@@ -72,12 +72,18 @@
     </div>
     <div class="grid2">
       <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">CPF</label>
-        <input class="form-input" id="f-cpf" placeholder="000.000.000-00" oninput="maskCPF(this)" onpaste="setTimeout(()=>maskCPF(this),0)" inputmode="numeric" maxlength="14"/>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+          <label class="form-label" id="f-doc-label" style="margin-bottom:0">CPF</label>
+          <div style="display:flex;gap:3px;background:#f0f4f8;border-radius:16px;padding:2px">
+            <button id="f-toggle-cpf" onclick="toggleFDoc('cpf')" type="button" style="border-radius:14px;padding:2px 10px;font-size:11px;font-weight:600;background:#003366;color:#fff;border:none;cursor:pointer">CPF</button>
+            <button id="f-toggle-cnpj" onclick="toggleFDoc('cnpj')" type="button" style="border-radius:14px;padding:2px 10px;font-size:11px;font-weight:600;background:transparent;color:#666;border:none;cursor:pointer">CNPJ</button>
+          </div>
+        </div>
+        <input class="form-input" id="f-cpf" placeholder="000.000.000-00" oninput="maskFDoc(this)" onpaste="setTimeout(()=>maskFDoc(this),0)" inputmode="numeric" maxlength="18"/>
       </div>
       <div class="form-group" style="margin-bottom:0">
         <label class="form-label">Telefone / WhatsApp <span class="required">*</span></label>
-        <input class="form-input" id="f-fone" placeholder="(51) 99999-9999" inputmode="tel"/>
+        <input class="form-input" id="f-fone" placeholder="(51) 99999-9999" oninput="maskFFone(this)" onpaste="setTimeout(()=>maskFFone(this),0)" inputmode="tel" maxlength="15"/>
       </div>
     </div>
   </div>
@@ -167,6 +173,52 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+let fDocTipo = 'cpf';
+
+function toggleFDoc(tipo) {
+  fDocTipo = tipo;
+  const el    = document.getElementById('f-cpf');
+  const label = document.getElementById('f-doc-label');
+  const btnCpf  = document.getElementById('f-toggle-cpf');
+  const btnCnpj = document.getElementById('f-toggle-cnpj');
+  el.value = '';
+  if (tipo === 'cpf') {
+    label.textContent = 'CPF';
+    el.placeholder = '000.000.000-00';
+    el.maxLength = 14;
+    btnCpf.style.background  = '#003366'; btnCpf.style.color  = '#fff';
+    btnCnpj.style.background = 'transparent'; btnCnpj.style.color = '#666';
+  } else {
+    label.textContent = 'CNPJ';
+    el.placeholder = '00.000.000/0000-00';
+    el.maxLength = 18;
+    btnCnpj.style.background = '#003366'; btnCnpj.style.color = '#fff';
+    btnCpf.style.background  = 'transparent'; btnCpf.style.color = '#666';
+  }
+}
+
+function maskFDoc(el) {
+  if (fDocTipo === 'cnpj') {
+    let v = el.value.replace(/\D/g,'').slice(0,14);
+    if (v.length > 12)     v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/,'$1.$2.$3/$4-$5');
+    else if (v.length > 8) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{0,4})/,'$1.$2.$3/$4');
+    else if (v.length > 5) v = v.replace(/(\d{2})(\d{3})(\d{0,3})/,'$1.$2.$3');
+    else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,3})/,'$1.$2');
+    el.value = v;
+  } else {
+    maskCPF(el);
+  }
+}
+
+function maskFFone(el) {
+  let v = el.value.replace(/\D/g,'').slice(0,11);
+  if (v.length > 10)     v = v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3');
+  else if (v.length > 6) v = v.replace(/(\d{2})(\d{4,5})(\d{0,4})/,'($1) $2-$3');
+  else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/,'($1) $2');
+  else if (v.length > 0) v = '(' + v;
+  el.value = v;
+}
+
 function maskCPF(el) {
   let v = el.value.replace(/\D/g,'').slice(0,11);
   if (v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
@@ -213,7 +265,7 @@ async function enviarSolicitacao() {
       id:     Date.now(),
       num:    count,
       nome,
-      cpf:    document.getElementById('f-cpf').value.trim(),
+      cpf:    (fDocTipo==='cnpj'?'CNPJ: ':'')+document.getElementById('f-cpf').value.trim(),
       fone,
       rua,
       numEnd: num,
