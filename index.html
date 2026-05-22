@@ -660,8 +660,13 @@ async function loadFromFirebase() {
     setStatus('☁️ Online', 'ok');
     return true;
   } catch(e) {
-    console.error('Erro ao carregar Firebase:', e);
-    setStatus('📴 Offline — dados locais', 'erro');
+    console.error('Firebase error:', e);
+    const code = e.code || e.message || String(e);
+    const el = document.getElementById('fb-status');
+    if (el) {
+      el.innerHTML = `⚠️ ${code} <button onclick="location.reload()" style="margin-left:6px;background:#fff3;border:1px solid #fff5;color:#fff;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:11px">↻ Reconectar</button>`;
+      el.className = 'fb-status erro';
+    }
     produtos   = JSON.parse(localStorage.getItem('acn_produtos') || '[]');
     orcamentos = JSON.parse(localStorage.getItem('acn_orcamentos') || '[]');
     return false;

@@ -233,10 +233,12 @@ async function enviarSolicitacao() {
     document.getElementById('success-num').textContent = '#' + String(count).padStart(3,'0');
 
   } catch(e) {
-    console.error(e);
+    console.error('Firebase error:', e);
     btn.disabled = false;
     btn.textContent = '📦 Enviar Solicitação de Pedido';
-    setStatus('❌ Erro ao enviar. Verifique sua conexão e tente novamente.', true);
+    // Mostra o erro real para diagnóstico
+    const msg = e.code || e.message || String(e);
+    setStatus('❌ Erro: ' + msg, true);
   }
 }
 </script>
