@@ -6,6 +6,7 @@
 <title>Aço Naval — Confirmar Pedido</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:Arial,Helvetica,sans-serif;background:#f0f4f8;min-height:100vh;color:#111}
@@ -300,6 +301,20 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// ── FIREBASE GESTÃO (Realtime Database) ──────────────────────────
+const gestaoConfig = {
+  apiKey: "AIzaSyAb46YPuZDtuGitlySCxKXJjy0WEy0xPMI",
+  authDomain: "aco-naval-gestao.firebaseapp.com",
+  databaseURL: "https://aco-naval-gestao-default-rtdb.firebaseio.com",
+  projectId: "aco-naval-gestao",
+  storageBucket: "aco-naval-gestao.firebasestorage.app",
+  messagingSenderId: "359027216116",
+  appId: "1:359027216116:web:af8df148f57e7c3fb398a1"
+};
+const gestaoApp = firebase.initializeApp(gestaoConfig, 'gestao');
+const gestaoDb  = gestaoApp.database();
+const GESTAO_REF = gestaoDb.ref('dados');
+
 const fmtBRL = v => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0);
 const fmtDate = iso => { if(!iso) return '—'; const [y,m,d]=iso.split('-'); return `${d}/${m}/${y}`; };
 
@@ -430,6 +445,55 @@ function clearCanvas() {
 }
 
 // ── CONFIRMAR ─────────────────────────────────────────────────────
+// ── ENVIA PEDIDO PARA SISTEMA DE GESTÃO ─────────────────────────
+async function enviarParaGestao(pedido, nomeAssinante) {
+  try {
+    const snap = await GESTAO_REF.once('value');
+    const dados = snap.val() || {};
+    const vs    = dados.vs || [];   // vendedores
+    const ps    = dados.ps || [];   // pedidos existentes
+
+    if (!vs.length) {
+      console.warn('Gestão: nenhum vendedor cadastrado, pedido não enviado.');
+      return;
+    }
+
+    const agora = new Date();
+    const mes   = agora.getMonth() + 1;
+    const ano   = agora.getFullYear();
+    const gid   = Date.now();
+    const val   = pedido.subtotal || 0;
+
+    // Cria uma entrada por vendedor (todos por padrão)
+    const novosPedidos = vs.map((v, i) => ({
+      id:   gid + i,
+      gid,
+      num:  String(pedido.num).padStart(3, '0'),
+      prod: null,
+      cid:  pedido.cidade || '',
+      uf:   pedido.estado || '',
+      val,
+      vid:  v.id,
+      mes,
+      ano,
+      meia: false,
+      com:  parseFloat((val * v.perc / 100).toFixed(2)),
+      // Dados extras para rastreabilidade
+      clienteNome: pedido.nome || '',
+      assinadoPor: nomeAssinante || '',
+      assinadoEm:  new Date().toISOString(),
+      origem:      'orcamentos'
+    }));
+
+    dados.ps = [...ps, ...novosPedidos];
+    await GESTAO_REF.set(dados);
+    console.log('✅ Pedido enviado para Gestão:', novosPedidos.length, 'registros');
+  } catch(e) {
+    console.warn('⚠️ Erro ao enviar para Gestão (não crítico):', e.message);
+    // Não bloqueia a assinatura se a gestão falhar
+  }
+}
+
 async function confirmarPedido() {
   const nome = document.getElementById('sign-nome').value.trim();
   const check = document.getElementById('sign-check').checked;
@@ -460,6 +524,9 @@ async function confirmarPedido() {
     lista[idx].status = 'assinado';
 
     await db.collection('acn').doc('pedidos').set({lista});
+
+    // Envia automaticamente para o sistema de gestão
+    await enviarParaGestao(pedidoAtual, nome);
 
     // Tela de sucesso
     document.getElementById('suc-num').textContent = `Pedido #${String(pedidoAtual.num).padStart(3,'0')}`;
