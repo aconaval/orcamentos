@@ -2,378 +2,364 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Orçamento — Aço Naval</title>
 <meta property="og:site_name" content="Aço Naval">
 <meta property="og:description" content="Visualize seu orçamento da Aço Naval">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
-body{background:#f0f4f8;min-height:100vh;padding:0}
-
-/* ── TOPBAR ── */
-.topbar{background:#003366;padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
-.logo{color:#fff;font-size:16px;font-weight:700;letter-spacing:.3px;display:flex;align-items:center;gap:10px}
-.logo img{height:36px;width:auto;filter:brightness(0) invert(1)}
-.logo-text span{display:block;font-size:10px;color:rgba(255,255,255,.6);font-weight:400;margin-top:1px}
-
-/* ── WRAPPER ── */
-.wrapper{max-width:780px;margin:0 auto;padding:24px 16px 48px}
-
-/* ── LOADING / ERROR ── */
-.state-box{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;gap:12px}
-.spinner{width:36px;height:36px;border:3px solid #d0d8e4;border-top-color:#185FA5;border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.state-title{font-size:16px;font-weight:600;color:#333}
-.state-sub{font-size:13px;color:#888}
-
-/* ── DOC ── */
-.doc{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:#f0f4f8;min-height:100vh;color:#111}
 
 /* HEADER */
-.doc-header{display:flex;align-items:center;justify-content:space-between;background:#003366;padding:16px 20px;gap:16px}
-.doc-logo{display:flex;align-items:center;gap:10px}
-.doc-logo img{height:44px;width:auto;filter:brightness(0) invert(1)}
-.doc-logo-name{color:#fff;font-size:15px;font-weight:700}
-.doc-logo-site{color:rgba(255,255,255,.6);font-size:11px;margin-top:2px}
-.doc-meta{text-align:right;flex-shrink:0}
-.doc-meta-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.55)}
-.doc-meta-val{font-size:14px;font-weight:700;color:#fff;margin-top:2px}
-.doc-meta-num{font-size:11px;color:rgba(255,255,255,.55);margin-top:2px}
+.header{background:#003366;color:#fff;padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.header img{height:40px;mix-blend-mode:multiply;background:#fff;border-radius:3px;padding:2px;flex-shrink:0}
+.header-text h1{font-size:18px;font-weight:700}
+.header-text p{font-size:11px;color:#aac4e8;margin-top:1px}
 
-/* CLIENT STRIP */
-.client-strip{background:#EAF3DE;border-bottom:1px solid #C0DD97;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.client-name-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#3B6D11;font-weight:700;margin-bottom:3px}
-.client-name{font-size:16px;font-weight:700;color:#003366}
-.client-fone{font-size:13px;color:#555;margin-top:2px}
-.doc-num-badge{background:#003366;color:#fff;font-size:13px;font-weight:700;padding:6px 14px;border-radius:999px;white-space:nowrap;flex-shrink:0}
+.container{max-width:600px;margin:0 auto;padding:16px 14px 60px}
 
-/* TABLE */
-.items-wrap{padding:20px}
-.section-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:700;color:#888;margin-bottom:10px}
-table{width:100%;border-collapse:collapse}
-thead th{background:#003366;color:#fff;padding:9px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.3px}
-tbody td{padding:10px 12px;border-bottom:1px solid #f0f2f5;font-size:13px;vertical-align:top}
-tbody tr:last-child td{border-bottom:none}
-tbody tr:nth-child(even){background:#fafbfc}
-.td-idx{width:36px;text-align:center;font-weight:700;color:#003366;padding-top:14px!important}
-.td-val{text-align:right;white-space:nowrap;font-weight:700;color:#185FA5;padding-top:14px!important}
-.item-foto-wrap{display:table-cell;width:80px;vertical-align:top;padding-right:10px}
-.item-foto-wrap img{width:72px;height:72px;object-fit:contain;border-radius:4px;background:#f8f8f8;border:1px solid #eee}
-.item-content{display:table-cell;vertical-align:middle}
-.item-nome{font-weight:700;font-size:13px;color:#003366}
-.item-desc{font-size:12px;color:#666;margin-top:3px;line-height:1.5}
-.total-row td{background:#EAF3DE!important;border-top:2px solid #003366!important;font-weight:700;font-size:14px;padding:11px 12px!important}
-.total-row .td-val{color:#1a7a44!important;font-size:16px}
+/* CARDS */
+.card{background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.08);margin-bottom:14px;overflow:hidden}
+.card-header{background:#003366;color:#fff;padding:10px 16px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
+.card-body{padding:16px}
 
-/* OBS */
-.obs-box{margin:0 20px 16px;background:#fafbfc;border:1px solid #e0e4e8;border-radius:6px;padding:10px 14px;font-size:12px;color:#555;line-height:1.6}
-.obs-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;color:#888;margin-bottom:4px}
+/* BANNER */
+.orc-banner{background:#185FA5;color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.orc-num{font-size:28px;font-weight:700;line-height:1}
+.orc-label{font-size:10px;opacity:.8;text-transform:uppercase;letter-spacing:.5px}
+.orc-date{text-align:right;font-size:12px;opacity:.9;line-height:1.6}
 
-/* INFO GRID */
-.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 20px 16px}
-.info-cell{border-radius:6px;padding:10px 12px}
+/* VALIDITY BAR */
+.validity-bar{padding:8px 16px;font-size:12px;font-weight:500;display:none}
+
+/* INFO ROWS */
+.info-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:10px;font-size:13px}
+.info-row:last-child{margin-bottom:0}
+.info-icon{width:20px;flex-shrink:0;margin-top:1px}
+.info-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px}
+.info-value{font-weight:600;color:#111}
+
+/* ITEM ROW - igual ao assinar */
+.item-row{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.item-row:last-child{border-bottom:none}
+.item-foto{width:64px;height:64px;object-fit:contain;border-radius:4px;background:#f5f5f5;flex-shrink:0;border:1px solid #eee}
+.item-foto-ph{width:64px;height:64px;border-radius:4px;background:#f0f4f8;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px}
+.item-info{flex:1}
+.item-num{font-size:11px;font-weight:700;color:#003366;margin-bottom:2px}
+.item-nome{font-size:13px;font-weight:700;color:#111}
+.item-dim{font-size:12px;color:#666;margin-top:3px;line-height:1.5}
+.item-preco{font-size:14px;font-weight:700;color:#003366;margin-top:6px}
+.item-total-bar{background:#EAF3DE;border-radius:6px;padding:10px 14px;margin-top:12px;display:flex;justify-content:space-between;align-items:center}
+
+/* INFO CELLS */
+.info-cells{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.info-cell{border-radius:8px;padding:10px 12px}
 .info-cell-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:4px}
 .info-cell-val{font-size:13px;font-weight:700;color:#111}
 
-/* PAYMENT */
-.pay-section{padding:0 20px 16px}
-.pay-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;color:#888;margin-bottom:8px}
-.pay-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid #e0e4e8;border-radius:8px;overflow:hidden}
-.pay-cell{padding:14px 16px}
-.pay-cell:first-child{border-right:1px solid #e0e4e8}
-.pay-icon{font-size:20px;margin-bottom:6px}
-.pay-title{font-weight:700;font-size:13px;margin-bottom:6px;color:#111}
-.pay-amount{font-size:20px;font-weight:700;margin-bottom:4px}
-.pay-info{font-size:12px;line-height:1.6;color:#444}
+/* TOTAL */
+.total-box{background:#eef3fa;border-radius:8px;padding:12px 14px}
+.total-main{display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:700;color:#1a7a44;padding-top:4px}
+.total-avista{font-size:13px;color:#1a7a44;font-weight:600;text-align:right;margin-top:6px}
 
-/* CONDITIONS */
-.cond-box{margin:0 20px 20px;background:#fafbfc;border:1px solid #e0e4e8;border-radius:6px;padding:10px 14px;font-size:11px;color:#666;line-height:1.7}
-.cond-title{font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;color:#888;margin-bottom:4px}
+/* PAGAMENTO */
+.pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.pay-cell{background:#f8fafc;border:1px solid #e0e8f0;border-radius:8px;padding:10px 12px;text-align:center}
+.pay-type{font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px}
+.pay-value{font-size:15px;font-weight:700;color:#003366}
+.pay-value.green{color:#1a7a44}
+.pay-sub{font-size:10px;color:#888;margin-top:2px;line-height:1.4}
 
-/* FOOTER */
-.doc-footer{border-top:1px solid #f0f2f5;padding:14px 20px;text-align:center;font-size:11px;color:#bbb}
+/* CONDIÇÕES */
+.cond-text{font-size:11px;color:#666;line-height:1.7}
+
+.doc-footer{text-align:center;font-size:11px;color:#bbb;padding:4px 0 8px}
 .doc-footer a{color:#185FA5;text-decoration:none}
 
-/* VALIDADE BANNER */
-.validity-bar{background:#E6F1FB;border-bottom:1px solid #B5D4F4;padding:8px 20px;font-size:12px;color:#185FA5;text-align:center;font-weight:500}
-
-/* ── FORM SECTION ── */
-.form-divider{margin:28px 0 0;text-align:center}
-.form-divider-line{border:none;border-top:2px dashed #d0d8e8;margin:0}
+/* FORM */
+.form-divider{margin:8px 0;text-align:center}
+.form-divider-line{border:none;border-top:2px dashed #d0d8e8}
 .form-divider-label{display:inline-block;background:#f0f4f8;padding:0 16px;position:relative;top:-13px;font-size:13px;font-weight:700;color:#185FA5;letter-spacing:.3px}
-.fcard{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-top:12px}
-.fcard-head{background:#003366;color:#fff;padding:14px 20px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
-.fcard-body{padding:20px}
+
+.fcard{background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.08);margin-bottom:14px;overflow:hidden}
+.fcard-head{background:#003366;color:#fff;padding:10px 16px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.fcard-body{padding:16px}
 .fform-group{margin-bottom:14px}
-.fform-label{display:block;font-size:11px;font-weight:700;color:#555;margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
-.fform-input{width:100%;padding:10px 12px;border:1.5px solid #d0d7e0;border-radius:6px;font-size:14px;color:#111;transition:border .2s;background:#fff}
+.fform-group:last-child{margin-bottom:0}
+.fform-label{display:block;font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px}
+.fform-input{width:100%;padding:10px 12px;border:1.5px solid #d0d7e0;border-radius:6px;font-size:14px;color:#111;background:#fff;transition:border .2s}
 .fform-input:focus{outline:none;border-color:#003366;box-shadow:0 0 0 3px rgba(0,51,102,.08)}
 select.fform-input{cursor:pointer}
 .fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .fgrid4{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px}
 .freq{color:#c0392b}
-.btn-enviar{width:100%;padding:14px;background:#003366;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:background .2s;margin-top:4px}
+.toggle-group{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.toggle-btns{display:flex;gap:3px;background:#f0f4f8;border-radius:16px;padding:2px}
+.toggle-btn{border-radius:14px;padding:2px 10px;font-size:11px;font-weight:600;border:none;cursor:pointer}
+.btn-enviar{width:100%;padding:14px;background:#003366;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px}
 .btn-enviar:hover{background:#185FA5}
 .btn-enviar:disabled{background:#aaa;cursor:not-allowed}
 .fstatus{font-size:13px;text-align:center;margin-top:10px;color:#666;min-height:20px}
 .fstatus.erro{color:#c0392b;font-weight:600}
-.fsuccess{background:#eef9f2;border:2px solid #1a7a44;border-radius:10px;padding:36px 20px;text-align:center;margin-top:12px}
-.fsuccess-icon{font-size:48px;margin-bottom:12px}
-.fsuccess-title{font-size:20px;font-weight:700;color:#1a7a44;margin-bottom:8px}
-.fsuccess-msg{font-size:14px;color:#555;line-height:1.7}
-.fsuccess-num{font-size:30px;font-weight:700;color:#003366;margin:14px 0;letter-spacing:1px}
 
-/* MOBILE */
-@media(max-width:600px){
-  .wrapper{padding:12px 8px 48px}
-  .doc-header{padding:12px 14px}
-  .doc-logo img{height:36px}
-  .info-grid{grid-template-columns:1fr}
-  .pay-grid{grid-template-columns:1fr}
-  .pay-cell:first-child{border-right:none;border-bottom:1px solid #e0e4e8}
-  .client-strip{padding:10px 14px}
-  .items-wrap{padding:12px}
-  .obs-box,.cond-box,.pay-section{padding-left:12px;padding-right:12px;margin-left:0;margin-right:0}
-  .info-grid{padding-left:12px;padding-right:12px}
-  .fgrid2{grid-template-columns:1fr}
+.loading{text-align:center;padding:60px 20px}
+.loading-spinner{width:40px;height:40px;border:3px solid #e0e8f0;border-top-color:#003366;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.success-screen{text-align:center;padding:40px 20px}
+.success-icon{font-size:64px;margin-bottom:16px}
+.success-title{font-size:22px;font-weight:700;color:#1a7a44;margin-bottom:10px}
+.success-num{font-size:30px;font-weight:700;color:#003366;margin:14px 0;letter-spacing:1px}
+.success-msg{font-size:14px;color:#555;line-height:1.6}
+.success-detail{background:#eef9f2;border:1px solid #b8e0c7;border-radius:8px;padding:12px 16px;text-align:left;font-size:13px;color:#2a6b3a;margin:12px 0 20px}
+
+@media(max-width:500px){
+  .info-cells{grid-template-columns:1fr 1fr}
+  .pay-grid,.fgrid2{grid-template-columns:1fr}
   .fgrid4{grid-template-columns:1fr 1fr}
-  .fcard-body{padding:14px}
+}
+@media(max-width:360px){
+  .info-cells{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="logo">
-    <div class="logo-text">
-      <div>AÇO NAVAL</div>
-      <span>www.aconaval.com</span>
-    </div>
+<div class="header">
+  <img src="data:image/png;base64,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" alt="Aço Naval"/>
+  <div class="header-text">
+    <h1>AÇO NAVAL</h1>
+    <p>Orçamento Online</p>
   </div>
-  <div style="color:rgba(255,255,255,.5);font-size:11px">Orçamento Online</div>
 </div>
 
-<div class="wrapper">
-  <!-- Estado inicial: carregando -->
-  <div class="state-box" id="state-loading">
-    <div class="spinner"></div>
-    <div class="state-title">Carregando orçamento…</div>
-    <div class="state-sub">Aguarde um instante</div>
+<div class="container">
+
+  <div id="screen-loading">
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <p style="color:#888;font-size:14px">Carregando orçamento…</p>
+    </div>
   </div>
 
-  <!-- Estado: erro -->
-  <div class="state-box" id="state-error" style="display:none">
-    <div style="font-size:2.5rem">😕</div>
-    <div class="state-title">Orçamento não encontrado</div>
-    <div class="state-sub">O link pode estar incorreto ou o orçamento foi removido.</div>
-    <a href="https://www.aconaval.com" style="margin-top:8px;color:#185FA5;font-size:13px;text-decoration:none">← Ir para aconaval.com</a>
+  <div id="screen-error" style="display:none">
+    <div class="card">
+      <div class="card-body" style="text-align:center;padding:40px 20px">
+        <div style="font-size:48px;margin-bottom:16px">😕</div>
+        <div style="font-size:18px;font-weight:700;color:#c0392b;margin-bottom:8px">Orçamento não encontrado</div>
+        <div style="font-size:13px;color:#888;margin-bottom:16px">O link pode estar incorreto ou o orçamento foi removido.</div>
+        <a href="https://www.aconaval.com" style="color:#185FA5;font-size:13px;text-decoration:none">← Ir para aconaval.com</a>
+      </div>
+    </div>
   </div>
 
-  <!-- Documento do orçamento -->
-  <div class="doc" id="doc" style="display:none">
+  <div id="screen-doc" style="display:none">
 
-    <div id="validity-bar" class="validity-bar" style="display:none"></div>
-
-    <div class="doc-header">
-      <div class="doc-logo">
-        <img id="logo-img" src="data:image/png;base64,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" alt="Logo" style="height:44px;width:auto;filter:brightness(0) invert(1)">
+    <div class="card">
+      <div class="validity-bar" id="validity-bar"></div>
+      <div class="orc-banner">
         <div>
-          <div class="doc-logo-name">AÇO NAVAL</div>
-          <div class="doc-logo-site">www.aconaval.com</div>
+          <div class="orc-label">Orçamento</div>
+          <div class="orc-num" id="doc-num-badge">#—</div>
         </div>
+        <div class="orc-date" id="orc-date-block">—</div>
       </div>
-      <div class="doc-meta">
-        <div class="doc-meta-label">Data do Orçamento</div>
-        <div class="doc-meta-val" id="doc-data">—</div>
-        <div class="doc-meta-num" id="doc-num-header">Orçamento Nº —</div>
-      </div>
-    </div>
-
-    <div class="client-strip">
-      <div>
-        <div class="client-name-label">Cliente</div>
-        <div class="client-name" id="doc-cliente">—</div>
-        <div class="client-fone" id="doc-fone"></div>
-      </div>
-      <div class="doc-num-badge" id="doc-num-badge">#—</div>
-    </div>
-
-    <div class="items-wrap">
-      <div class="section-label">Produtos / Serviços</div>
-      <table>
-        <thead>
-          <tr>
-            <th style="width:36px">Nº</th>
-            <th>Descrição</th>
-            <th style="text-align:right;width:120px">Valor Unit.</th>
-          </tr>
-        </thead>
-        <tbody id="items-tbody"></tbody>
-      </table>
-    </div>
-
-    <div id="obs-wrap" style="display:none">
-      <div class="obs-box">
-        <div class="obs-label">Observação</div>
-        <div id="obs-text"></div>
-      </div>
-    </div>
-
-    <div class="info-grid">
-      <div class="info-cell" style="background:#EAF3DE;border:1px solid #C0DD97">
-        <div class="info-cell-label" style="color:#3B6D11">📅 Prazo de entrega</div>
-        <div class="info-cell-val" id="doc-prazo">—</div>
-      </div>
-      <div class="info-cell" style="background:#E6F1FB;border:1px solid #B5D4F4">
-        <div class="info-cell-label" style="color:#185FA5">🚚 Frete</div>
-        <div class="info-cell-val">Grátis</div>
-      </div>
-      <div class="info-cell" style="background:#f5f7fa;border:1px solid #d0d4d8">
-        <div class="info-cell-label" style="color:#555">💳 Pagamento</div>
-        <div class="info-cell-val">Somente ao receber</div>
-      </div>
-    </div>
-
-    <div class="pay-section">
-      <div class="pay-label">Formas de Pagamento</div>
-      <div class="pay-grid">
-        <div class="pay-cell">
-          <div class="pay-icon">💳</div>
-          <div class="pay-title">Cartão de Crédito</div>
-          <div class="pay-amount" style="color:#003366" id="pay-total-cartao">R$ —</div>
-          <div class="pay-info" id="pay-parcelas">Em até 12x sem juros</div>
+      <div class="card-body">
+        <div class="info-row">
+          <div class="info-icon">👤</div>
+          <div>
+            <div class="info-label">Cliente</div>
+            <div class="info-value" id="doc-cliente">—</div>
+          </div>
         </div>
-        <div class="pay-cell">
-          <div class="pay-icon">💰</div>
-          <div class="pay-title">À Vista — 10% de desconto</div>
-          <div class="pay-amount" style="color:#1a7a44" id="pay-total-avista">R$ —</div>
-          <div class="pay-info" style="color:#1a7a44">Chave PIX (e-mail):<br><strong>contato.aconaval@gmail.com</strong></div>
+        <div class="info-row" id="fone-row" style="display:none">
+          <div class="info-icon">📞</div>
+          <div>
+            <div class="info-label">Telefone</div>
+            <div class="info-value" id="doc-fone">—</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="cond-box">
-      <div class="cond-title">Condições Gerais</div>
-      Este orçamento não requer pagamento antecipado. O valor é cobrado exclusivamente no ato da entrega.
-      A instalação dos dutos de chaminé é de responsabilidade do cliente, devendo ser executada por profissional habilitado (funileiro, calheiro ou pedreiro).
-      O cliente deverá garantir a presença de no mínimo duas pessoas para auxílio na descarga dos produtos na entrega.
+    <div class="card">
+      <div class="card-header">📦 Produtos / Serviços</div>
+      <div class="card-body" id="items-body"></div>
+    </div>
+
+    <div class="card" id="obs-wrap" style="display:none">
+      <div class="card-header">📝 Observação</div>
+      <div class="card-body">
+        <div style="font-size:13px;color:#555;line-height:1.6" id="obs-text"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">ℹ️ Informações</div>
+      <div class="card-body">
+        <div class="info-cells">
+          <div class="info-cell" style="background:#EAF3DE;border:1px solid #C0DD97">
+            <div class="info-cell-label" style="color:#3B6D11">📅 Prazo</div>
+            <div class="info-cell-val" id="doc-prazo">—</div>
+          </div>
+          <div class="info-cell" style="background:#E6F1FB;border:1px solid #B5D4F4">
+            <div class="info-cell-label" style="color:#185FA5">🚚 Frete</div>
+            <div class="info-cell-val">Grátis</div>
+          </div>
+          <div class="info-cell" style="background:#f5f7fa;border:1px solid #d0d4d8">
+            <div class="info-cell-label" style="color:#555">💳 Cobrança</div>
+            <div class="info-cell-val">Na entrega</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">💰 Formas de Pagamento</div>
+      <div class="card-body">
+        <div class="total-box">
+          <div class="total-main">
+            <span>Total do Pedido</span>
+            <span id="pay-total-cartao">—</span>
+          </div>
+          <div class="total-avista" id="pay-total-avista-text">—</div>
+        </div>
+        <div class="pay-grid">
+          <div class="pay-cell">
+            <div class="pay-type">💳 Cartão</div>
+            <div class="pay-value" id="pay-cartao">—</div>
+            <div class="pay-sub" id="pay-parcelas">Até 12x sem juros</div>
+          </div>
+          <div class="pay-cell">
+            <div class="pay-type">💰 À Vista PIX</div>
+            <div class="pay-value green" id="pay-avista">—</div>
+            <div class="pay-sub">10% de desconto<br>contato.aconaval@gmail.com</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">📋 Condições Gerais</div>
+      <div class="card-body">
+        <p class="cond-text">Este orçamento não requer pagamento antecipado. O valor é cobrado exclusivamente no ato da entrega. A instalação dos dutos de chaminé é de responsabilidade do cliente, devendo ser executada por profissional habilitado (funileiro, calheiro ou pedreiro). O cliente deverá garantir a presença de no mínimo duas pessoas para auxílio na descarga dos produtos na entrega.</p>
+      </div>
     </div>
 
     <div class="doc-footer">
       Documento gerado pela <strong>Aço Naval</strong> · <a href="https://www.aconaval.com">www.aconaval.com</a>
     </div>
 
-  </div><!-- /doc -->
-
-  <!-- ── SEPARADOR ── -->
-  <div class="form-divider" id="form-section" style="display:none">
-    <hr class="form-divider-line">
-    <span class="form-divider-label">📦 Confirmar Pedido</span>
   </div>
 
-  <!-- FORMULÁRIO -->
-  <div id="form-wrap" style="display:none">
+  <div id="form-section" style="display:none">
+    <div class="form-divider">
+      <hr class="form-divider-line">
+      <span class="form-divider-label">📦 Confirmar Pedido</span>
+    </div>
 
-    <div class="fcard">
-      <div class="fcard-head">&#128100; Dados Pessoais</div>
-      <div class="fcard-body">
-        <div class="fform-group">
-          <label class="fform-label">Nome Completo <span class="freq">*</span></label>
-          <input class="fform-input" id="f-nome" placeholder="Seu nome completo" autocomplete="name"/>
-        </div>
-        <div class="fgrid2">
-          <div class="fform-group" style="margin-bottom:0">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
-              <label class="fform-label" id="f-doc-label" style="margin-bottom:0">CPF</label>
-              <div style="display:flex;gap:3px;background:#f0f4f8;border-radius:16px;padding:2px">
-                <button id="f-toggle-cpf" onclick="toggleFDoc('cpf')" type="button" style="border-radius:14px;padding:2px 10px;font-size:11px;font-weight:600;background:#003366;color:#fff;border:none;cursor:pointer">CPF</button>
-                <button id="f-toggle-cnpj" onclick="toggleFDoc('cnpj')" type="button" style="border-radius:14px;padding:2px 10px;font-size:11px;font-weight:600;background:transparent;color:#666;border:none;cursor:pointer">CNPJ</button>
+    <div id="form-wrap">
+
+      <div class="fcard">
+        <div class="fcard-head">&#128100; Dados Pessoais</div>
+        <div class="fcard-body">
+          <div class="fform-group">
+            <label class="fform-label">Nome Completo <span class="freq">*</span></label>
+            <input class="fform-input" id="f-nome" placeholder="Seu nome completo" autocomplete="name"/>
+          </div>
+          <div class="fgrid2">
+            <div class="fform-group" style="margin-bottom:0">
+              <div class="toggle-group">
+                <label class="fform-label" id="f-doc-label" style="margin-bottom:0">CPF</label>
+                <div class="toggle-btns">
+                  <button id="f-toggle-cpf" onclick="toggleFDoc('cpf')" type="button" class="toggle-btn" style="background:#003366;color:#fff">CPF</button>
+                  <button id="f-toggle-cnpj" onclick="toggleFDoc('cnpj')" type="button" class="toggle-btn" style="background:transparent;color:#666">CNPJ</button>
+                </div>
               </div>
+              <input class="fform-input" id="f-cpf" placeholder="000.000.000-00" oninput="maskFDoc(this)" onpaste="setTimeout(()=>maskFDoc(this),0)" inputmode="numeric" maxlength="18"/>
             </div>
-            <input class="fform-input" id="f-cpf" placeholder="000.000.000-00" oninput="maskFDoc(this)" onpaste="setTimeout(()=>maskFDoc(this),0)" inputmode="numeric" maxlength="18"/>
-          </div>
-          <div class="fform-group" style="margin-bottom:0">
-            <label class="fform-label">Telefone / WhatsApp <span class="freq">*</span></label>
-            <input class="fform-input" id="f-fone" placeholder="(51) 99999-9999" oninput="maskFFone(this)" onpaste="setTimeout(()=>maskFFone(this),0)" inputmode="tel" maxlength="15"/>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="fcard">
-      <div class="fcard-head">&#128205; Endere&#231;o de Entrega</div>
-      <div class="fcard-body">
-        <div class="fgrid2" style="margin-bottom:14px">
-          <div class="fform-group" style="margin-bottom:0">
-            <label class="fform-label">Nome da Rua <span class="freq">*</span></label>
-            <input class="fform-input" id="f-rua" placeholder="Ex: Rua das Flores" autocomplete="street-address"/>
-          </div>
-          <div class="fform-group" style="margin-bottom:0">
-            <label class="fform-label">N&#250;mero <span class="freq">*</span></label>
-            <input class="fform-input" id="f-num" placeholder="Ex: 123"/>
-          </div>
-        </div>
-        <div class="fgrid4">
-          <div class="fform-group" style="margin-bottom:0">
-            <label class="fform-label">Bairro</label>
-            <input class="fform-input" id="f-bairro" placeholder="Ex: Centro"/>
-          </div>
-          <div class="fform-group" style="margin-bottom:0">
-            <label class="fform-label">CEP</label>
-            <input class="fform-input" id="f-cep" placeholder="00000-000" oninput="maskCEP(this)" inputmode="numeric"/>
-          </div>
-          <div class="fform-group" style="margin-bottom:0">
-            <label class="fform-label">Cidade <span class="freq">*</span></label>
-            <input class="fform-input" id="f-cidade" placeholder="Ex: Porto Alegre"/>
-          </div>
-          <div class="fform-group" style="margin-bottom:0">
-            <label class="fform-label">Estado <span class="freq">*</span></label>
-            <select class="fform-input" id="f-estado">
-              <option value="">UF...</option>
-              <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
-              <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
-              <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
-              <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
-              <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
-              <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
-              <option>SP</option><option>SE</option><option>TO</option>
-            </select>
+            <div class="fform-group" style="margin-bottom:0">
+              <label class="fform-label">WhatsApp <span class="freq">*</span></label>
+              <input class="fform-input" id="f-fone" placeholder="(51) 99999-9999" oninput="maskFFone(this)" onpaste="setTimeout(()=>maskFFone(this),0)" inputmode="tel" maxlength="15"/>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="fcard">
-      <div class="fcard-head">&#128172; Observa&#231;&#245;es</div>
-      <div class="fcard-body">
-        <textarea class="fform-input" id="f-obs" rows="3" placeholder="Alguma observa&#231;&#227;o sobre seu pedido? (opcional)" style="resize:vertical"></textarea>
+      <div class="fcard">
+        <div class="fcard-head">&#128205; Endere&#231;o de Entrega</div>
+        <div class="fcard-body">
+          <div class="fgrid2" style="margin-bottom:14px">
+            <div class="fform-group" style="margin-bottom:0">
+              <label class="fform-label">Nome da Rua <span class="freq">*</span></label>
+              <input class="fform-input" id="f-rua" placeholder="Ex: Rua das Flores" autocomplete="street-address"/>
+            </div>
+            <div class="fform-group" style="margin-bottom:0">
+              <label class="fform-label">N&#250;mero <span class="freq">*</span></label>
+              <input class="fform-input" id="f-num" placeholder="Ex: 123"/>
+            </div>
+          </div>
+          <div class="fgrid4">
+            <div class="fform-group" style="margin-bottom:0">
+              <label class="fform-label">Bairro</label>
+              <input class="fform-input" id="f-bairro" placeholder="Ex: Centro"/>
+            </div>
+            <div class="fform-group" style="margin-bottom:0">
+              <label class="fform-label">CEP</label>
+              <input class="fform-input" id="f-cep" placeholder="00000-000" oninput="maskCEP(this)" inputmode="numeric" maxlength="9"/>
+            </div>
+            <div class="fform-group" style="margin-bottom:0">
+              <label class="fform-label">Cidade <span class="freq">*</span></label>
+              <input class="fform-input" id="f-cidade" placeholder="Ex: Porto Alegre"/>
+            </div>
+            <div class="fform-group" style="margin-bottom:0">
+              <label class="fform-label">Estado <span class="freq">*</span></label>
+              <select class="fform-input" id="f-estado">
+                <option value="">UF...</option>
+                <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+                <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+                <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+                <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+                <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+                <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+                <option>SP</option><option>SE</option><option>TO</option>
+              </select>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <button class="btn-enviar" id="btn-enviar" onclick="enviarSolicitacao()">&#128230; Enviar Solicita&#231;&#227;o de Pedido</button>
-    <div class="fstatus" id="fstatus-msg"></div>
+      <div class="fcard">
+        <div class="fcard-head">&#128172; Observa&#231;&#245;es</div>
+        <div class="fcard-body">
+          <textarea class="fform-input" id="f-obs" rows="3" placeholder="Alguma observa&#231;&#227;o sobre seu pedido? (opcional)" style="resize:vertical"></textarea>
+        </div>
+      </div>
 
-  </div>
+      <button class="btn-enviar" id="btn-enviar" onclick="enviarSolicitacao()">&#128230; Enviar Solicita&#231;&#227;o de Pedido</button>
+      <div class="fstatus" id="fstatus-msg"></div>
 
-  <!-- SUCESSO -->
-  <div class="fsuccess" id="fsuccess-box" style="display:none">
-    <div class="fsuccess-icon">&#9989;</div>
-    <div class="fsuccess-title">Solicita&#231;&#227;o Enviada com Sucesso!</div>
-    <div class="fsuccess-msg">Recebemos seus dados. Em breve a equipe da A&#231;o Naval entrar&#225; em contato para confirmar os produtos e enviar seu pedido.</div>
-    <div class="fsuccess-num" id="fsuccess-num">#001</div>
-    <div class="fsuccess-msg">Guarde este n&#250;mero para refer&#234;ncia.</div>
-    <div style="margin-top:20px;font-size:13px;color:#888;line-height:1.8">
-      &#128222; D&#250;vidas? Fale com a gente:<br>
-      <strong style="color:#003366">contato.aconaval@gmail.com</strong>
     </div>
   </div>
 
+  <div id="fsuccess-box" style="display:none">
+    <div class="card">
+      <div class="success-screen">
+        <div class="success-icon">&#9989;</div>
+        <div class="success-title">Solicita&#231;&#227;o Enviada!</div>
+        <div class="success-num" id="fsuccess-num">#001</div>
+        <div class="success-detail">Recebemos seus dados. Em breve a equipe da A&#231;o Naval entrar&#225; em contato para confirmar os produtos e enviar seu pedido. Guarde este n&#250;mero para refer&#234;ncia.</div>
+        <div class="success-msg">
+          &#128222; D&#250;vidas?<br>
+          <strong style="color:#003366">contato.aconaval@gmail.com</strong>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </div>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <script>
 const firebaseConfig = {
@@ -388,126 +374,117 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 const fmtBRL = v => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0);
+
 function fmtDate(iso) {
   if (!iso) return '—';
-  const [y,m,d] = iso.split('-');
-  return `${d}/${m}/${y}`;
+  const parts = iso.split('-');
+  return parts[2] + '/' + parts[1] + '/' + parts[0];
 }
 
 function showError() {
-  document.getElementById('state-loading').style.display = 'none';
-  document.getElementById('state-error').style.display   = 'flex';
+  document.getElementById('screen-loading').style.display = 'none';
+  document.getElementById('screen-error').style.display   = 'block';
+}
+
+function buildItemHtml(item, idx) {
+  var lines = (item.desc || '').split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+  var nome  = lines[0] || '';
+  var dims  = lines.slice(1).join(' · ');
+  var fotoHtml = item.foto
+    ? '<img src="' + item.foto + '" class="item-foto"/>'
+    : '<div class="item-foto-ph">📦</div>';
+  var precoHtml = item.preco > 0
+    ? '<div class="item-preco">' + fmtBRL(item.preco) + '</div>'
+    : '';
+  var dimsHtml = dims
+    ? '<div class="item-dim">' + dims + '</div>'
+    : '';
+  var numStr = (idx + 1 < 10 ? '0' : '') + (idx + 1);
+  return '<div class="item-row">'
+    + fotoHtml
+    + '<div class="item-info">'
+    + '<div class="item-num">Item ' + numStr + '</div>'
+    + '<div class="item-nome">' + nome + '</div>'
+    + dimsHtml
+    + precoHtml
+    + '</div>'
+    + '</div>';
 }
 
 function renderOrcamento(o) {
-  // Atualiza title da página → aparece ao compartilhar
-  const num = String(o.num).padStart(3,'0');
-  const titulo = `ORÇAMENTO ${num} — ${o.cliente.toUpperCase()}`;
-  document.title = titulo;
+  var num = String(o.num).padStart(3, '0');
+  document.title = 'ORCAMENTO ' + num + ' — ' + o.cliente.toUpperCase();
 
-  // Preenche os campos
-  document.getElementById('doc-data').textContent = fmtDate(o.data);
-  document.getElementById('doc-num-header').textContent = `Orçamento Nº ${num}`;
-  document.getElementById('doc-num-badge').textContent = `#${num}`;
+  document.getElementById('doc-num-badge').textContent = '#' + num;
+  document.getElementById('orc-date-block').innerHTML = 'Data do Orçamento<br><strong>' + fmtDate(o.data) + '</strong>';
   document.getElementById('doc-cliente').textContent = o.cliente;
 
-  const foneEl = document.getElementById('doc-fone');
-  if (o.fone) { foneEl.textContent = '📞 ' + o.fone; foneEl.style.display = 'block'; }
+  if (o.fone) {
+    document.getElementById('doc-fone').textContent = o.fone;
+    document.getElementById('fone-row').style.display = 'flex';
+  }
 
-  // Prazo (30 dias a partir da data do orçamento)
-  const prazoDate = o.data ? new Date(o.data + 'T12:00:00') : new Date();
+  // Prazo 30 dias
+  var prazoDate = o.data ? new Date(o.data + 'T12:00:00') : new Date();
   prazoDate.setDate(prazoDate.getDate() + 30);
   document.getElementById('doc-prazo').textContent = prazoDate.toLocaleDateString('pt-BR');
 
   // Validade
-  const validBar = document.getElementById('validity-bar');
-  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  var validBar = document.getElementById('validity-bar');
+  var hoje = new Date(); hoje.setHours(0,0,0,0);
   if (prazoDate >= hoje) {
-    const dias = Math.round((prazoDate - hoje) / 86400000);
-    validBar.textContent = `⏳ Este orçamento é válido por mais ${dias} dia${dias !== 1 ? 's' : ''}`;
-    validBar.style.display = 'block';
+    var dias = Math.round((prazoDate - hoje) / 86400000);
+    validBar.textContent = '⏳ Válido por mais ' + dias + (dias !== 1 ? ' dias' : ' dia');
+    validBar.style.cssText = 'display:block;background:#E6F1FB;color:#185FA5;padding:8px 16px;font-size:12px;font-weight:500;border-bottom:1px solid #B5D4F4';
   } else {
-    validBar.textContent = '⚠️ Este orçamento pode estar vencido — entre em contato para confirmar';
-    validBar.style.background = '#FEF3CD';
-    validBar.style.borderColor = '#F0C040';
-    validBar.style.color = '#7A5E00';
-    validBar.style.display = 'block';
+    validBar.textContent = '⚠️ Orçamento pode estar vencido — entre em contato para confirmar';
+    validBar.style.cssText = 'display:block;background:#FEF3CD;color:#7A5E00;padding:8px 16px;font-size:12px;font-weight:500;border-bottom:1px solid #F0C040';
   }
 
-  // Itens
-  const tbody = document.getElementById('items-tbody');
-  const rows = o.items.map((item, idx) => {
-    const lines = (item.desc || '').split('\n').map(l => l.trim()).filter(Boolean);
-    const nome  = lines[0] || '';
-    const resto = lines.slice(1).join('<br>');
-    const fotoHtml = item.foto
-      ? `<div style="display:table-cell;width:80px;vertical-align:top;padding-right:10px">
-           <img src="${item.foto}" style="width:72px;height:72px;object-fit:contain;border-radius:4px;background:#f8f8f8;border:1px solid #eee">
-         </div>`
-      : '';
-    return `<tr>
-      <td class="td-idx">${String(idx+1).padStart(2,'0')}</td>
-      <td>
-        <div style="display:table;width:100%">
-          ${fotoHtml}
-          <div style="display:table-cell;vertical-align:middle">
-            <div class="item-nome">${nome}</div>
-            ${resto ? `<div class="item-desc">${resto}</div>` : ''}
-          </div>
-        </div>
-      </td>
-      <td class="td-val">${item.preco > 0 ? fmtBRL(item.preco) : '—'}</td>
-    </tr>`;
-  }).join('');
+  // Itens — flex rows, sem tabela
+  var itemsHtml = '';
+  for (var i = 0; i < o.items.length; i++) {
+    itemsHtml += buildItemHtml(o.items[i], i);
+  }
+  itemsHtml += '<div class="item-total-bar">'
+    + '<span style="font-size:12px;text-transform:uppercase;color:#3B6D11;font-weight:700;letter-spacing:.5px">Total do Pedido</span>'
+    + '<span style="font-size:16px;font-weight:700;color:#1a7a44">' + fmtBRL(o.subtotal) + '</span>'
+    + '</div>';
+  document.getElementById('items-body').innerHTML = itemsHtml;
 
-  const totalRow = `<tr class="total-row">
-    <td colspan="2" style="text-align:right;color:#3B6D11;font-size:12px;text-transform:uppercase;letter-spacing:.5px">Valor Total do Pedido</td>
-    <td class="td-val" style="color:#1a7a44;font-size:16px">${fmtBRL(o.subtotal)}</td>
-  </tr>`;
-
-  tbody.innerHTML = rows + totalRow;
-
-  // Observação
+  // Obs
   if (o.obs) {
     document.getElementById('obs-text').textContent = o.obs;
     document.getElementById('obs-wrap').style.display = 'block';
   }
 
   // Pagamento
-  const avista = o.subtotal * 0.90;
-  const parcela = Math.ceil(o.subtotal / 12 * 100) / 100;
-  document.getElementById('pay-total-cartao').textContent = fmtBRL(o.subtotal);
-  document.getElementById('pay-total-avista').textContent = fmtBRL(avista);
-  document.getElementById('pay-parcelas').textContent = `Em até 12x sem juros de ${fmtBRL(parcela)} cada parcela`;
+  var avista  = o.subtotal * 0.90;
+  var parcela = Math.ceil(o.subtotal / 12 * 100) / 100;
+  document.getElementById('pay-total-cartao').textContent     = fmtBRL(o.subtotal);
+  document.getElementById('pay-total-avista-text').textContent = 'À vista com 10% desc: ' + fmtBRL(avista);
+  document.getElementById('pay-cartao').textContent            = fmtBRL(o.subtotal);
+  document.getElementById('pay-parcelas').textContent          = 'Até 12x de ' + fmtBRL(parcela);
+  document.getElementById('pay-avista').textContent            = fmtBRL(avista);
 
-  // Guarda referência do orçamento para o formulário
   currentOrcId  = o.id;
   currentOrcNum = o.num;
 
-  // Mostra o documento
-  document.getElementById('state-loading').style.display = 'none';
-  document.getElementById('doc').style.display = 'block';
-
-  // Mostra o formulário abaixo
+  document.getElementById('screen-loading').style.display = 'none';
+  document.getElementById('screen-doc').style.display     = 'block';
   showForm();
 }
 
-// ── INICIALIZA ────────────────────────────────────────────
 (async function() {
-  const params = new URLSearchParams(location.search);
-  const id = params.get('id');
-
+  var params = new URLSearchParams(location.search);
+  var id = params.get('id');
   if (!id) { showError(); return; }
-
   try {
-    const snap = await db.collection('acn').doc('orcamentos').get();
+    var snap = await db.collection('acn').doc('orcamentos').get();
     if (!snap.exists) { showError(); return; }
-
-    const lista = snap.data().lista || [];
-    const orc = lista.find(o => String(o.id) === String(id));
-
+    var lista = snap.data().lista || [];
+    var orc = lista.find(function(o){ return String(o.id) === String(id); });
     if (!orc) { showError(); return; }
-
     renderOrcamento(orc);
   } catch(e) {
     console.error(e);
@@ -515,10 +492,9 @@ function renderOrcamento(o) {
   }
 })();
 
-// ── FORM ────────────────────────────────────────────────
-let fDocTipo = 'cpf';
-let currentOrcId = null;
-let currentOrcNum = null;
+var fDocTipo = 'cpf';
+var currentOrcId = null;
+var currentOrcNum = null;
 
 function showForm() {
   document.getElementById('form-section').style.display = 'block';
@@ -527,10 +503,10 @@ function showForm() {
 
 function toggleFDoc(tipo) {
   fDocTipo = tipo;
-  const el    = document.getElementById('f-cpf');
-  const label = document.getElementById('f-doc-label');
-  const btnCpf  = document.getElementById('f-toggle-cpf');
-  const btnCnpj = document.getElementById('f-toggle-cnpj');
+  var el    = document.getElementById('f-cpf');
+  var label = document.getElementById('f-doc-label');
+  var btnCpf  = document.getElementById('f-toggle-cpf');
+  var btnCnpj = document.getElementById('f-toggle-cnpj');
   el.value = '';
   if (tipo === 'cpf') {
     label.textContent = 'CPF'; el.placeholder = '000.000.000-00'; el.maxLength = 14;
@@ -545,7 +521,7 @@ function toggleFDoc(tipo) {
 
 function maskFDoc(el) {
   if (fDocTipo === 'cnpj') {
-    let v = el.value.replace(/\D/g,'').slice(0,14);
+    var v = el.value.replace(/\D/g,'').slice(0,14);
     if (v.length > 12)     v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/,'$1.$2.$3/$4-$5');
     else if (v.length > 8) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{0,4})/,'$1.$2.$3/$4');
     else if (v.length > 5) v = v.replace(/(\d{2})(\d{3})(\d{0,3})/,'$1.$2.$3');
@@ -554,7 +530,7 @@ function maskFDoc(el) {
   } else { maskCPF(el); }
 }
 function maskFFone(el) {
-  let v = el.value.replace(/\D/g,'').slice(0,11);
+  var v = el.value.replace(/\D/g,'').slice(0,11);
   if (v.length > 10)     v = v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3');
   else if (v.length > 6) v = v.replace(/(\d{2})(\d{4,5})(\d{0,4})/,'($1) $2-$3');
   else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/,'($1) $2');
@@ -562,30 +538,30 @@ function maskFFone(el) {
   el.value = v;
 }
 function maskCPF(el) {
-  let v = el.value.replace(/\D/g,'').slice(0,11);
+  var v = el.value.replace(/\D/g,'').slice(0,11);
   if (v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
   else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/,'$1.$2.$3');
   else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/,'$1.$2');
   el.value = v;
 }
 function maskCEP(el) {
-  let v = el.value.replace(/\D/g,'').slice(0,8);
+  var v = el.value.replace(/\D/g,'').slice(0,8);
   v = v.replace(/(\d{5})(\d)/,'$1-$2');
   el.value = v;
 }
-function setFStatus(msg, erro=false) {
-  const el = document.getElementById('fstatus-msg');
+function setFStatus(msg, erro) {
+  var el = document.getElementById('fstatus-msg');
   el.textContent = msg;
   el.className = 'fstatus' + (erro ? ' erro' : '');
 }
 
 async function enviarSolicitacao() {
-  const nome   = document.getElementById('f-nome').value.trim();
-  const fone   = document.getElementById('f-fone').value.trim();
-  const rua    = document.getElementById('f-rua').value.trim();
-  const num    = document.getElementById('f-num').value.trim();
-  const cidade = document.getElementById('f-cidade').value.trim();
-  const estado = document.getElementById('f-estado').value.trim();
+  var nome   = document.getElementById('f-nome').value.trim();
+  var fone   = document.getElementById('f-fone').value.trim();
+  var rua    = document.getElementById('f-rua').value.trim();
+  var num    = document.getElementById('f-num').value.trim();
+  var cidade = document.getElementById('f-cidade').value.trim();
+  var estado = document.getElementById('f-estado').value.trim();
 
   if (!nome)   { setFStatus('⚠️ Informe seu nome completo.',true);  document.getElementById('f-nome').focus();   return; }
   if (!fone)   { setFStatus('⚠️ Informe seu telefone.',true);       document.getElementById('f-fone').focus();   return; }
@@ -594,26 +570,26 @@ async function enviarSolicitacao() {
   if (!cidade) { setFStatus('⚠️ Informe a cidade.',true);           document.getElementById('f-cidade').focus(); return; }
   if (!estado) { setFStatus('⚠️ Selecione o estado.',true);         document.getElementById('f-estado').focus(); return; }
 
-  const btn = document.getElementById('btn-enviar');
+  var btn = document.getElementById('btn-enviar');
   btn.disabled = true; btn.textContent = '⏳ Enviando...'; setFStatus('');
 
   try {
-    const countSnap = await db.collection('acn').doc('solicitacoes_count').get();
-    const count = countSnap.exists ? (countSnap.data().total || 0) + 1 : 1;
+    var countSnap = await db.collection('acn').doc('solicitacoes_count').get();
+    var count = countSnap.exists ? (countSnap.data().total || 0) + 1 : 1;
     await db.collection('acn').doc('solicitacoes_count').set({ total: count });
 
-    const sol = {
+    var sol = {
       id:       Date.now(),
       num:      count,
-      nome,
+      nome:     nome,
       cpf:      (fDocTipo==='cnpj'?'CNPJ: ':'')+document.getElementById('f-cpf').value.trim(),
-      fone,
-      rua,
+      fone:     fone,
+      rua:      rua,
       numEnd:   num,
       bairro:   document.getElementById('f-bairro').value.trim(),
       cep:      document.getElementById('f-cep').value.trim(),
-      cidade,
-      estado,
+      cidade:   cidade,
+      estado:   estado,
       obs:      document.getElementById('f-obs').value.trim(),
       status:   'aguardando',
       orcId:    currentOrcId,
@@ -631,11 +607,10 @@ async function enviarSolicitacao() {
   } catch(e) {
     console.error('Firebase error:', e);
     btn.disabled = false;
-    btn.textContent = '📦 Enviar Solicitação de Pedido';
+    btn.innerHTML = '📦 Enviar Solicitação de Pedido';
     setFStatus('❌ Erro: ' + (e.code || e.message || String(e)), true);
   }
 }
-
 </script>
 </body>
 </html>
