@@ -97,6 +97,32 @@ tbody tr:nth-child(even){background:#fafbfc}
 /* VALIDADE BANNER */
 .validity-bar{background:#E6F1FB;border-bottom:1px solid #B5D4F4;padding:8px 20px;font-size:12px;color:#185FA5;text-align:center;font-weight:500}
 
+/* ── FORM SECTION ── */
+.form-divider{margin:28px 0 0;text-align:center}
+.form-divider-line{border:none;border-top:2px dashed #d0d8e8;margin:0}
+.form-divider-label{display:inline-block;background:#f0f4f8;padding:0 16px;position:relative;top:-13px;font-size:13px;font-weight:700;color:#185FA5;letter-spacing:.3px}
+.fcard{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-top:12px}
+.fcard-head{background:#003366;color:#fff;padding:14px 20px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.fcard-body{padding:20px}
+.fform-group{margin-bottom:14px}
+.fform-label{display:block;font-size:11px;font-weight:700;color:#555;margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+.fform-input{width:100%;padding:10px 12px;border:1.5px solid #d0d7e0;border-radius:6px;font-size:14px;color:#111;transition:border .2s;background:#fff}
+.fform-input:focus{outline:none;border-color:#003366;box-shadow:0 0 0 3px rgba(0,51,102,.08)}
+select.fform-input{cursor:pointer}
+.fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fgrid4{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px}
+.freq{color:#c0392b}
+.btn-enviar{width:100%;padding:14px;background:#003366;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:background .2s;margin-top:4px}
+.btn-enviar:hover{background:#185FA5}
+.btn-enviar:disabled{background:#aaa;cursor:not-allowed}
+.fstatus{font-size:13px;text-align:center;margin-top:10px;color:#666;min-height:20px}
+.fstatus.erro{color:#c0392b;font-weight:600}
+.fsuccess{background:#eef9f2;border:2px solid #1a7a44;border-radius:10px;padding:36px 20px;text-align:center;margin-top:12px}
+.fsuccess-icon{font-size:48px;margin-bottom:12px}
+.fsuccess-title{font-size:20px;font-weight:700;color:#1a7a44;margin-bottom:8px}
+.fsuccess-msg{font-size:14px;color:#555;line-height:1.7}
+.fsuccess-num{font-size:30px;font-weight:700;color:#003366;margin:14px 0;letter-spacing:1px}
+
 /* MOBILE */
 @media(max-width:600px){
   .wrapper{padding:12px 8px 48px}
@@ -109,6 +135,9 @@ tbody tr:nth-child(even){background:#fafbfc}
   .items-wrap{padding:12px}
   .obs-box,.cond-box,.pay-section{padding-left:12px;padding-right:12px;margin-left:0;margin-right:0}
   .info-grid{padding-left:12px;padding-right:12px}
+  .fgrid2{grid-template-columns:1fr}
+  .fgrid4{grid-template-columns:1fr 1fr}
+  .fcard-body{padding:14px}
 }
 </style>
 </head>
@@ -235,6 +264,111 @@ tbody tr:nth-child(even){background:#fafbfc}
     </div>
 
   </div><!-- /doc -->
+
+  <!-- ── SEPARADOR ── -->
+  <div class="form-divider" id="form-section" style="display:none">
+    <hr class="form-divider-line">
+    <span class="form-divider-label">📦 Confirmar Pedido</span>
+  </div>
+
+  <!-- FORMULÁRIO -->
+  <div id="form-wrap" style="display:none">
+
+    <div class="fcard">
+      <div class="fcard-head">&#128100; Dados Pessoais</div>
+      <div class="fcard-body">
+        <div class="fform-group">
+          <label class="fform-label">Nome Completo <span class="freq">*</span></label>
+          <input class="fform-input" id="f-nome" placeholder="Seu nome completo" autocomplete="name"/>
+        </div>
+        <div class="fgrid2">
+          <div class="fform-group" style="margin-bottom:0">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+              <label class="fform-label" id="f-doc-label" style="margin-bottom:0">CPF</label>
+              <div style="display:flex;gap:3px;background:#f0f4f8;border-radius:16px;padding:2px">
+                <button id="f-toggle-cpf" onclick="toggleFDoc('cpf')" type="button" style="border-radius:14px;padding:2px 10px;font-size:11px;font-weight:600;background:#003366;color:#fff;border:none;cursor:pointer">CPF</button>
+                <button id="f-toggle-cnpj" onclick="toggleFDoc('cnpj')" type="button" style="border-radius:14px;padding:2px 10px;font-size:11px;font-weight:600;background:transparent;color:#666;border:none;cursor:pointer">CNPJ</button>
+              </div>
+            </div>
+            <input class="fform-input" id="f-cpf" placeholder="000.000.000-00" oninput="maskFDoc(this)" onpaste="setTimeout(()=>maskFDoc(this),0)" inputmode="numeric" maxlength="18"/>
+          </div>
+          <div class="fform-group" style="margin-bottom:0">
+            <label class="fform-label">Telefone / WhatsApp <span class="freq">*</span></label>
+            <input class="fform-input" id="f-fone" placeholder="(51) 99999-9999" oninput="maskFFone(this)" onpaste="setTimeout(()=>maskFFone(this),0)" inputmode="tel" maxlength="15"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fcard">
+      <div class="fcard-head">&#128205; Endere&#231;o de Entrega</div>
+      <div class="fcard-body">
+        <div class="fgrid2" style="margin-bottom:14px">
+          <div class="fform-group" style="margin-bottom:0">
+            <label class="fform-label">Nome da Rua <span class="freq">*</span></label>
+            <input class="fform-input" id="f-rua" placeholder="Ex: Rua das Flores" autocomplete="street-address"/>
+          </div>
+          <div class="fform-group" style="margin-bottom:0">
+            <label class="fform-label">N&#250;mero <span class="freq">*</span></label>
+            <input class="fform-input" id="f-num" placeholder="Ex: 123"/>
+          </div>
+        </div>
+        <div class="fgrid4">
+          <div class="fform-group" style="margin-bottom:0">
+            <label class="fform-label">Bairro</label>
+            <input class="fform-input" id="f-bairro" placeholder="Ex: Centro"/>
+          </div>
+          <div class="fform-group" style="margin-bottom:0">
+            <label class="fform-label">CEP</label>
+            <input class="fform-input" id="f-cep" placeholder="00000-000" oninput="maskCEP(this)" inputmode="numeric"/>
+          </div>
+          <div class="fform-group" style="margin-bottom:0">
+            <label class="fform-label">Cidade <span class="freq">*</span></label>
+            <input class="fform-input" id="f-cidade" placeholder="Ex: Porto Alegre"/>
+          </div>
+          <div class="fform-group" style="margin-bottom:0">
+            <label class="fform-label">Estado <span class="freq">*</span></label>
+            <select class="fform-input" id="f-estado">
+              <option value="">UF...</option>
+              <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+              <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+              <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+              <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+              <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+              <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+              <option>SP</option><option>SE</option><option>TO</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fcard">
+      <div class="fcard-head">&#128172; Observa&#231;&#245;es</div>
+      <div class="fcard-body">
+        <textarea class="fform-input" id="f-obs" rows="3" placeholder="Alguma observa&#231;&#227;o sobre seu pedido? (opcional)" style="resize:vertical"></textarea>
+      </div>
+    </div>
+
+    <button class="btn-enviar" id="btn-enviar" onclick="enviarSolicitacao()">&#128230; Enviar Solicita&#231;&#227;o de Pedido</button>
+    <div class="fstatus" id="fstatus-msg"></div>
+
+  </div>
+
+  <!-- SUCESSO -->
+  <div class="fsuccess" id="fsuccess-box" style="display:none">
+    <div class="fsuccess-icon">&#9989;</div>
+    <div class="fsuccess-title">Solicita&#231;&#227;o Enviada com Sucesso!</div>
+    <div class="fsuccess-msg">Recebemos seus dados. Em breve a equipe da A&#231;o Naval entrar&#225; em contato para confirmar os produtos e enviar seu pedido.</div>
+    <div class="fsuccess-num" id="fsuccess-num">#001</div>
+    <div class="fsuccess-msg">Guarde este n&#250;mero para refer&#234;ncia.</div>
+    <div style="margin-top:20px;font-size:13px;color:#888;line-height:1.8">
+      &#128222; D&#250;vidas? Fale com a gente:<br>
+      <strong style="color:#003366">contato.aconaval@gmail.com</strong>
+    </div>
+  </div>
+
+
 </div>
 
 <!-- Firebase SDK -->
@@ -346,9 +480,16 @@ function renderOrcamento(o) {
   document.getElementById('pay-total-avista').textContent = fmtBRL(avista);
   document.getElementById('pay-parcelas').textContent = `Em até 12x sem juros de ${fmtBRL(parcela)} cada parcela`;
 
+  // Guarda referência do orçamento para o formulário
+  currentOrcId  = o.id;
+  currentOrcNum = o.num;
+
   // Mostra o documento
   document.getElementById('state-loading').style.display = 'none';
   document.getElementById('doc').style.display = 'block';
+
+  // Mostra o formulário abaixo
+  showForm();
 }
 
 // ── INICIALIZA ────────────────────────────────────────────
@@ -373,6 +514,128 @@ function renderOrcamento(o) {
     showError();
   }
 })();
+
+// ── FORM ────────────────────────────────────────────────
+let fDocTipo = 'cpf';
+let currentOrcId = null;
+let currentOrcNum = null;
+
+function showForm() {
+  document.getElementById('form-section').style.display = 'block';
+  document.getElementById('form-wrap').style.display    = 'block';
+}
+
+function toggleFDoc(tipo) {
+  fDocTipo = tipo;
+  const el    = document.getElementById('f-cpf');
+  const label = document.getElementById('f-doc-label');
+  const btnCpf  = document.getElementById('f-toggle-cpf');
+  const btnCnpj = document.getElementById('f-toggle-cnpj');
+  el.value = '';
+  if (tipo === 'cpf') {
+    label.textContent = 'CPF'; el.placeholder = '000.000.000-00'; el.maxLength = 14;
+    btnCpf.style.background = '#003366'; btnCpf.style.color = '#fff';
+    btnCnpj.style.background = 'transparent'; btnCnpj.style.color = '#666';
+  } else {
+    label.textContent = 'CNPJ'; el.placeholder = '00.000.000/0000-00'; el.maxLength = 18;
+    btnCnpj.style.background = '#003366'; btnCnpj.style.color = '#fff';
+    btnCpf.style.background = 'transparent'; btnCpf.style.color = '#666';
+  }
+}
+
+function maskFDoc(el) {
+  if (fDocTipo === 'cnpj') {
+    let v = el.value.replace(/\D/g,'').slice(0,14);
+    if (v.length > 12)     v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/,'$1.$2.$3/$4-$5');
+    else if (v.length > 8) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{0,4})/,'$1.$2.$3/$4');
+    else if (v.length > 5) v = v.replace(/(\d{2})(\d{3})(\d{0,3})/,'$1.$2.$3');
+    else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,3})/,'$1.$2');
+    el.value = v;
+  } else { maskCPF(el); }
+}
+function maskFFone(el) {
+  let v = el.value.replace(/\D/g,'').slice(0,11);
+  if (v.length > 10)     v = v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3');
+  else if (v.length > 6) v = v.replace(/(\d{2})(\d{4,5})(\d{0,4})/,'($1) $2-$3');
+  else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/,'($1) $2');
+  else if (v.length > 0) v = '(' + v;
+  el.value = v;
+}
+function maskCPF(el) {
+  let v = el.value.replace(/\D/g,'').slice(0,11);
+  if (v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
+  else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/,'$1.$2.$3');
+  else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/,'$1.$2');
+  el.value = v;
+}
+function maskCEP(el) {
+  let v = el.value.replace(/\D/g,'').slice(0,8);
+  v = v.replace(/(\d{5})(\d)/,'$1-$2');
+  el.value = v;
+}
+function setFStatus(msg, erro=false) {
+  const el = document.getElementById('fstatus-msg');
+  el.textContent = msg;
+  el.className = 'fstatus' + (erro ? ' erro' : '');
+}
+
+async function enviarSolicitacao() {
+  const nome   = document.getElementById('f-nome').value.trim();
+  const fone   = document.getElementById('f-fone').value.trim();
+  const rua    = document.getElementById('f-rua').value.trim();
+  const num    = document.getElementById('f-num').value.trim();
+  const cidade = document.getElementById('f-cidade').value.trim();
+  const estado = document.getElementById('f-estado').value.trim();
+
+  if (!nome)   { setFStatus('⚠️ Informe seu nome completo.',true);  document.getElementById('f-nome').focus();   return; }
+  if (!fone)   { setFStatus('⚠️ Informe seu telefone.',true);       document.getElementById('f-fone').focus();   return; }
+  if (!rua)    { setFStatus('⚠️ Informe o nome da rua.',true);      document.getElementById('f-rua').focus();    return; }
+  if (!num)    { setFStatus('⚠️ Informe o número.',true);           document.getElementById('f-num').focus();    return; }
+  if (!cidade) { setFStatus('⚠️ Informe a cidade.',true);           document.getElementById('f-cidade').focus(); return; }
+  if (!estado) { setFStatus('⚠️ Selecione o estado.',true);         document.getElementById('f-estado').focus(); return; }
+
+  const btn = document.getElementById('btn-enviar');
+  btn.disabled = true; btn.textContent = '⏳ Enviando...'; setFStatus('');
+
+  try {
+    const countSnap = await db.collection('acn').doc('solicitacoes_count').get();
+    const count = countSnap.exists ? (countSnap.data().total || 0) + 1 : 1;
+    await db.collection('acn').doc('solicitacoes_count').set({ total: count });
+
+    const sol = {
+      id:       Date.now(),
+      num:      count,
+      nome,
+      cpf:      (fDocTipo==='cnpj'?'CNPJ: ':'')+document.getElementById('f-cpf').value.trim(),
+      fone,
+      rua,
+      numEnd:   num,
+      bairro:   document.getElementById('f-bairro').value.trim(),
+      cep:      document.getElementById('f-cep').value.trim(),
+      cidade,
+      estado,
+      obs:      document.getElementById('f-obs').value.trim(),
+      status:   'aguardando',
+      orcId:    currentOrcId,
+      orcNum:   currentOrcNum,
+      criadoEm: new Date().toISOString()
+    };
+
+    await db.collection('acn_solicitacoes').doc(String(sol.id)).set(sol);
+
+    document.getElementById('form-section').style.display = 'none';
+    document.getElementById('form-wrap').style.display    = 'none';
+    document.getElementById('fsuccess-num').textContent   = '#' + String(count).padStart(3,'0');
+    document.getElementById('fsuccess-box').style.display = 'block';
+
+  } catch(e) {
+    console.error('Firebase error:', e);
+    btn.disabled = false;
+    btn.textContent = '📦 Enviar Solicitação de Pedido';
+    setFStatus('❌ Erro: ' + (e.code || e.message || String(e)), true);
+  }
+}
+
 </script>
 </body>
 </html>
