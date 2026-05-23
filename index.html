@@ -1108,8 +1108,10 @@ function showOrcamento(id) {
   currentOrcamento = o;
   // Renderiza o MESMO HTML do PDF dentro do modal via iframe
   const printHTML = getHTMLOrc(o);
+  const blob = new Blob([printHTML], {type:'text/html'});
+  const blobUrl = URL.createObjectURL(blob);
   document.getElementById('modal-body').innerHTML =
-    `<iframe id="orc-preview-frame" srcdoc="${printHTML.replace(/"/g,'&quot;')}"
+    `<iframe src="${blobUrl}"
       style="width:100%;height:70vh;border:none;border-radius:4px"
       onload="this.style.height=(this.contentDocument.documentElement.scrollHeight+20)+'px'">
     </iframe>`;
@@ -1984,8 +1986,10 @@ function showPedido(id){
   currentPedido=p;
   // Renderiza o MESMO HTML do PDF dentro do modal via iframe
   const printHTML = getHTMLPed(p);
+  const blob = new Blob([printHTML], {type:'text/html'});
+  const blobUrl = URL.createObjectURL(blob);
   document.getElementById('modal-pedido-body').innerHTML =
-    `<iframe srcdoc="${printHTML.replace(/"/g,'&quot;')}"
+    `<iframe src="${blobUrl}"
       style="width:100%;height:70vh;border:none;border-radius:4px"
       onload="this.style.height=(this.contentDocument.documentElement.scrollHeight+20)+'px'">
     </iframe>`;
@@ -2159,9 +2163,19 @@ function getHTMLPed(p) {
       <div class="sign-line"></div>
       <div class="sign-name">Herondina Pittan</div>
     </div>
+    <div class="sign-cell">
+      ${p.assinatura
+        ? `<div style="height:50px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+             <img src="${p.assinatura.imagem}" style="height:48px;width:160px;object-fit:contain;image-rendering:auto;transform:none"/>
+           </div>`
+        : `<div style="height:50px"></div>`}
+      <div class="sign-line"></div>
+      <div class="sign-name">${p.assinatura ? p.assinatura.nome : '<span style="color:#ccc">Assinatura do Cliente</span>'}</div>
+      ${p.assinatura ? `<div style="font-size:9pt;color:#888;margin-top:3px">Cliente — ${new Date(p.assinatura.data).toLocaleString('pt-BR')}</div>` : ''}
+    </div>
   </div>
 
-  <!-- ══ PÁGINA 2: ORDEM DE PRODUÇÃO ══ -->
+  <!-- PÁGINA 2: ORDEM DE PRODUÇÃO -->
   <div style="page-break-before:always;margin-top:0"></div>
 
   <div style="margin-top:24px">
@@ -2227,20 +2241,16 @@ function getHTMLPed(p) {
       <div class="sign-line"></div>
       <div class="sign-name">Herondina Pittan</div>
     </div>
-    ${p.assinatura ? `
     <div class="sign-cell">
-      <div style="height:50px;display:flex;align-items:flex-end;justify-content:center">
-        <img src="${p.assinatura.imagem}" style="max-height:48px;max-width:100%;object-fit:contain"/>
-      </div>
+      ${p.assinatura
+        ? `<div style="height:50px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+             <img src="${p.assinatura.imagem}" style="height:48px;width:160px;object-fit:contain;image-rendering:auto;transform:none"/>
+           </div>`
+        : `<div style="height:50px"></div>`}
       <div class="sign-line"></div>
-      <div class="sign-name">${p.assinatura.nome}</div>
-      <div style="font-size:9pt;color:#888;margin-top:2px">Cliente — ${new Date(p.assinatura.data).toLocaleString('pt-BR')}</div>
-    </div>` : `
-    <div class="sign-cell">
-      <div style="height:50px"></div>
-      <div class="sign-line"></div>
-      <div class="sign-name" style="color:#aaa">Assinatura do Cliente</div>
-    </div>`}
+      <div class="sign-name">${p.assinatura ? p.assinatura.nome : '<span style="color:#ccc">Assinatura do Cliente</span>'}</div>
+      ${p.assinatura ? `<div style="font-size:9pt;color:#888;margin-top:3px">Cliente — ${new Date(p.assinatura.data).toLocaleString('pt-BR')}</div>` : ''}
+    </div>
   </div>
   </div><!-- end margin wrapper -->
 
