@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orçamento — Aço Naval</title>
+<meta property="og:site_name" content="Aço Naval">
+<meta property="og:description" content="Visualize seu orçamento da Aço Naval">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+body{background:#f0f4f8;min-height:100vh;padding:0}
+
+/* ── TOPBAR ── */
+.topbar{background:#003366;padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.logo{color:#fff;font-size:16px;font-weight:700;letter-spacing:.3px;display:flex;align-items:center;gap:10px}
+.logo img{height:36px;width:auto;filter:brightness(0) invert(1)}
+.logo-text span{display:block;font-size:10px;color:rgba(255,255,255,.6);font-weight:400;margin-top:1px}
+
+/* ── WRAPPER ── */
+.wrapper{max-width:780px;margin:0 auto;padding:24px 16px 48px}
+
+/* ── LOADING / ERROR ── */
+.state-box{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;gap:12px}
+.spinner{width:36px;height:36px;border:3px solid #d0d8e4;border-top-color:#185FA5;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.state-title{font-size:16px;font-weight:600;color:#333}
+.state-sub{font-size:13px;color:#888}
+
+/* ── DOC ── */
+.doc{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+
+/* HEADER */
+.doc-header{display:flex;align-items:center;justify-content:space-between;background:#003366;padding:16px 20px;gap:16px}
+.doc-logo{display:flex;align-items:center;gap:10px}
+.doc-logo img{height:44px;width:auto;filter:brightness(0) invert(1)}
+.doc-logo-name{color:#fff;font-size:15px;font-weight:700}
+.doc-logo-site{color:rgba(255,255,255,.6);font-size:11px;margin-top:2px}
+.doc-meta{text-align:right;flex-shrink:0}
+.doc-meta-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.55)}
+.doc-meta-val{font-size:14px;font-weight:700;color:#fff;margin-top:2px}
+.doc-meta-num{font-size:11px;color:rgba(255,255,255,.55);margin-top:2px}
+
+/* CLIENT STRIP */
+.client-strip{background:#EAF3DE;border-bottom:1px solid #C0DD97;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.client-name-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#3B6D11;font-weight:700;margin-bottom:3px}
+.client-name{font-size:16px;font-weight:700;color:#003366}
+.client-fone{font-size:13px;color:#555;margin-top:2px}
+.doc-num-badge{background:#003366;color:#fff;font-size:13px;font-weight:700;padding:6px 14px;border-radius:999px;white-space:nowrap;flex-shrink:0}
+
+/* TABLE */
+.items-wrap{padding:20px}
+.section-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:700;color:#888;margin-bottom:10px}
+table{width:100%;border-collapse:collapse}
+thead th{background:#003366;color:#fff;padding:9px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.3px}
+tbody td{padding:10px 12px;border-bottom:1px solid #f0f2f5;font-size:13px;vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:nth-child(even){background:#fafbfc}
+.td-idx{width:36px;text-align:center;font-weight:700;color:#003366;padding-top:14px!important}
+.td-val{text-align:right;white-space:nowrap;font-weight:700;color:#185FA5;padding-top:14px!important}
+.item-foto-wrap{display:table-cell;width:80px;vertical-align:top;padding-right:10px}
+.item-foto-wrap img{width:72px;height:72px;object-fit:contain;border-radius:4px;background:#f8f8f8;border:1px solid #eee}
+.item-content{display:table-cell;vertical-align:middle}
+.item-nome{font-weight:700;font-size:13px;color:#003366}
+.item-desc{font-size:12px;color:#666;margin-top:3px;line-height:1.5}
+.total-row td{background:#EAF3DE!important;border-top:2px solid #003366!important;font-weight:700;font-size:14px;padding:11px 12px!important}
+.total-row .td-val{color:#1a7a44!important;font-size:16px}
+
+/* OBS */
+.obs-box{margin:0 20px 16px;background:#fafbfc;border:1px solid #e0e4e8;border-radius:6px;padding:10px 14px;font-size:12px;color:#555;line-height:1.6}
+.obs-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;color:#888;margin-bottom:4px}
+
+/* INFO GRID */
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 20px 16px}
+.info-cell{border-radius:6px;padding:10px 12px}
+.info-cell-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:4px}
+.info-cell-val{font-size:13px;font-weight:700;color:#111}
+
+/* PAYMENT */
+.pay-section{padding:0 20px 16px}
+.pay-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;color:#888;margin-bottom:8px}
+.pay-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid #e0e4e8;border-radius:8px;overflow:hidden}
+.pay-cell{padding:14px 16px}
+.pay-cell:first-child{border-right:1px solid #e0e4e8}
+.pay-icon{font-size:20px;margin-bottom:6px}
+.pay-title{font-weight:700;font-size:13px;margin-bottom:6px;color:#111}
+.pay-amount{font-size:20px;font-weight:700;margin-bottom:4px}
+.pay-info{font-size:12px;line-height:1.6;color:#444}
+
+/* CONDITIONS */
+.cond-box{margin:0 20px 20px;background:#fafbfc;border:1px solid #e0e4e8;border-radius:6px;padding:10px 14px;font-size:11px;color:#666;line-height:1.7}
+.cond-title{font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;color:#888;margin-bottom:4px}
+
+/* FOOTER */
+.doc-footer{border-top:1px solid #f0f2f5;padding:14px 20px;text-align:center;font-size:11px;color:#bbb}
+.doc-footer a{color:#185FA5;text-decoration:none}
+
+/* VALIDADE BANNER */
+.validity-bar{background:#E6F1FB;border-bottom:1px solid #B5D4F4;padding:8px 20px;font-size:12px;color:#185FA5;text-align:center;font-weight:500}
+
+/* MOBILE */
+@media(max-width:600px){
+  .wrapper{padding:12px 8px 48px}
+  .doc-header{padding:12px 14px}
+  .doc-logo img{height:36px}
+  .info-grid{grid-template-columns:1fr}
+  .pay-grid{grid-template-columns:1fr}
+  .pay-cell:first-child{border-right:none;border-bottom:1px solid #e0e4e8}
+  .client-strip{padding:10px 14px}
+  .items-wrap{padding:12px}
+  .obs-box,.cond-box,.pay-section{padding-left:12px;padding-right:12px;margin-left:0;margin-right:0}
+  .info-grid{padding-left:12px;padding-right:12px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-text">
+      <div>AÇO NAVAL</div>
+      <span>www.aconaval.com</span>
+    </div>
+  </div>
+  <div style="color:rgba(255,255,255,.5);font-size:11px">Orçamento Online</div>
+</div>
+
+<div class="wrapper">
+  <!-- Estado inicial: carregando -->
+  <div class="state-box" id="state-loading">
+    <div class="spinner"></div>
+    <div class="state-title">Carregando orçamento…</div>
+    <div class="state-sub">Aguarde um instante</div>
+  </div>
+
+  <!-- Estado: erro -->
+  <div class="state-box" id="state-error" style="display:none">
+    <div style="font-size:2.5rem">😕</div>
+    <div class="state-title">Orçamento não encontrado</div>
+    <div class="state-sub">O link pode estar incorreto ou o orçamento foi removido.</div>
+    <a href="https://www.aconaval.com" style="margin-top:8px;color:#185FA5;font-size:13px;text-decoration:none">← Ir para aconaval.com</a>
+  </div>
+
+  <!-- Documento do orçamento -->
+  <div class="doc" id="doc" style="display:none">
+
+    <div id="validity-bar" class="validity-bar" style="display:none"></div>
+
+    <div class="doc-header">
+      <div class="doc-logo">
+        <img id="logo-img" src="data:image/png;base64,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" alt="Logo" style="height:44px;width:auto;filter:brightness(0) invert(1)">
+        <div>
+          <div class="doc-logo-name">AÇO NAVAL</div>
+          <div class="doc-logo-site">www.aconaval.com</div>
+        </div>
+      </div>
+      <div class="doc-meta">
+        <div class="doc-meta-label">Data do Orçamento</div>
+        <div class="doc-meta-val" id="doc-data">—</div>
+        <div class="doc-meta-num" id="doc-num-header">Orçamento Nº —</div>
+      </div>
+    </div>
+
+    <div class="client-strip">
+      <div>
+        <div class="client-name-label">Cliente</div>
+        <div class="client-name" id="doc-cliente">—</div>
+        <div class="client-fone" id="doc-fone"></div>
+      </div>
+      <div class="doc-num-badge" id="doc-num-badge">#—</div>
+    </div>
+
+    <div class="items-wrap">
+      <div class="section-label">Produtos / Serviços</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:36px">Nº</th>
+            <th>Descrição</th>
+            <th style="text-align:right;width:120px">Valor Unit.</th>
+          </tr>
+        </thead>
+        <tbody id="items-tbody"></tbody>
+      </table>
+    </div>
+
+    <div id="obs-wrap" style="display:none">
+      <div class="obs-box">
+        <div class="obs-label">Observação</div>
+        <div id="obs-text"></div>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-cell" style="background:#EAF3DE;border:1px solid #C0DD97">
+        <div class="info-cell-label" style="color:#3B6D11">📅 Prazo de entrega</div>
+        <div class="info-cell-val" id="doc-prazo">—</div>
+      </div>
+      <div class="info-cell" style="background:#E6F1FB;border:1px solid #B5D4F4">
+        <div class="info-cell-label" style="color:#185FA5">🚚 Frete</div>
+        <div class="info-cell-val">Grátis</div>
+      </div>
+      <div class="info-cell" style="background:#f5f7fa;border:1px solid #d0d4d8">
+        <div class="info-cell-label" style="color:#555">💳 Pagamento</div>
+        <div class="info-cell-val">Somente ao receber</div>
+      </div>
+    </div>
+
+    <div class="pay-section">
+      <div class="pay-label">Formas de Pagamento</div>
+      <div class="pay-grid">
+        <div class="pay-cell">
+          <div class="pay-icon">💳</div>
+          <div class="pay-title">Cartão de Crédito</div>
+          <div class="pay-amount" style="color:#003366" id="pay-total-cartao">R$ —</div>
+          <div class="pay-info" id="pay-parcelas">Em até 12x sem juros</div>
+        </div>
+        <div class="pay-cell">
+          <div class="pay-icon">💰</div>
+          <div class="pay-title">À Vista — 10% de desconto</div>
+          <div class="pay-amount" style="color:#1a7a44" id="pay-total-avista">R$ —</div>
+          <div class="pay-info" style="color:#1a7a44">Chave PIX (e-mail):<br><strong>contato.aconaval@gmail.com</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cond-box">
+      <div class="cond-title">Condições Gerais</div>
+      Este orçamento não requer pagamento antecipado. O valor é cobrado exclusivamente no ato da entrega.
+      A instalação dos dutos de chaminé é de responsabilidade do cliente, devendo ser executada por profissional habilitado (funileiro, calheiro ou pedreiro).
+      O cliente deverá garantir a presença de no mínimo duas pessoas para auxílio na descarga dos produtos na entrega.
+    </div>
+
+    <div class="doc-footer">
+      Documento gerado pela <strong>Aço Naval</strong> · <a href="https://www.aconaval.com">www.aconaval.com</a>
+    </div>
+
+  </div><!-- /doc -->
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCdmk31BghJWGxjWwqGwNuC_LwsDXgX4JY",
+  authDomain: "orcamentos-aco-naval.firebaseapp.com",
+  projectId: "orcamentos-aco-naval",
+  storageBucket: "orcamentos-aco-naval.firebasestorage.app",
+  messagingSenderId: "802823831509",
+  appId: "1:802823831509:web:b5e575d8d5b7b62d5dc75c"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const fmtBRL = v => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0);
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function showError() {
+  document.getElementById('state-loading').style.display = 'none';
+  document.getElementById('state-error').style.display   = 'flex';
+}
+
+function renderOrcamento(o) {
+  // Atualiza title da página → aparece ao compartilhar
+  const num = String(o.num).padStart(3,'0');
+  const titulo = `ORÇAMENTO ${num} — ${o.cliente.toUpperCase()}`;
+  document.title = titulo;
+
+  // Preenche os campos
+  document.getElementById('doc-data').textContent = fmtDate(o.data);
+  document.getElementById('doc-num-header').textContent = `Orçamento Nº ${num}`;
+  document.getElementById('doc-num-badge').textContent = `#${num}`;
+  document.getElementById('doc-cliente').textContent = o.cliente;
+
+  const foneEl = document.getElementById('doc-fone');
+  if (o.fone) { foneEl.textContent = '📞 ' + o.fone; foneEl.style.display = 'block'; }
+
+  // Prazo (30 dias a partir da data do orçamento)
+  const prazoDate = o.data ? new Date(o.data + 'T12:00:00') : new Date();
+  prazoDate.setDate(prazoDate.getDate() + 30);
+  document.getElementById('doc-prazo').textContent = prazoDate.toLocaleDateString('pt-BR');
+
+  // Validade
+  const validBar = document.getElementById('validity-bar');
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  if (prazoDate >= hoje) {
+    const dias = Math.round((prazoDate - hoje) / 86400000);
+    validBar.textContent = `⏳ Este orçamento é válido por mais ${dias} dia${dias !== 1 ? 's' : ''}`;
+    validBar.style.display = 'block';
+  } else {
+    validBar.textContent = '⚠️ Este orçamento pode estar vencido — entre em contato para confirmar';
+    validBar.style.background = '#FEF3CD';
+    validBar.style.borderColor = '#F0C040';
+    validBar.style.color = '#7A5E00';
+    validBar.style.display = 'block';
+  }
+
+  // Itens
+  const tbody = document.getElementById('items-tbody');
+  const rows = o.items.map((item, idx) => {
+    const lines = (item.desc || '').split('\n').map(l => l.trim()).filter(Boolean);
+    const nome  = lines[0] || '';
+    const resto = lines.slice(1).join('<br>');
+    const fotoHtml = item.foto
+      ? `<div style="display:table-cell;width:80px;vertical-align:top;padding-right:10px">
+           <img src="${item.foto}" style="width:72px;height:72px;object-fit:contain;border-radius:4px;background:#f8f8f8;border:1px solid #eee">
+         </div>`
+      : '';
+    return `<tr>
+      <td class="td-idx">${String(idx+1).padStart(2,'0')}</td>
+      <td>
+        <div style="display:table;width:100%">
+          ${fotoHtml}
+          <div style="display:table-cell;vertical-align:middle">
+            <div class="item-nome">${nome}</div>
+            ${resto ? `<div class="item-desc">${resto}</div>` : ''}
+          </div>
+        </div>
+      </td>
+      <td class="td-val">${item.preco > 0 ? fmtBRL(item.preco) : '—'}</td>
+    </tr>`;
+  }).join('');
+
+  const totalRow = `<tr class="total-row">
+    <td colspan="2" style="text-align:right;color:#3B6D11;font-size:12px;text-transform:uppercase;letter-spacing:.5px">Valor Total do Pedido</td>
+    <td class="td-val" style="color:#1a7a44;font-size:16px">${fmtBRL(o.subtotal)}</td>
+  </tr>`;
+
+  tbody.innerHTML = rows + totalRow;
+
+  // Observação
+  if (o.obs) {
+    document.getElementById('obs-text').textContent = o.obs;
+    document.getElementById('obs-wrap').style.display = 'block';
+  }
+
+  // Pagamento
+  const avista = o.subtotal * 0.90;
+  const parcela = Math.ceil(o.subtotal / 12 * 100) / 100;
+  document.getElementById('pay-total-cartao').textContent = fmtBRL(o.subtotal);
+  document.getElementById('pay-total-avista').textContent = fmtBRL(avista);
+  document.getElementById('pay-parcelas').textContent = `Em até 12x sem juros de ${fmtBRL(parcela)} cada parcela`;
+
+  // Mostra o documento
+  document.getElementById('state-loading').style.display = 'none';
+  document.getElementById('doc').style.display = 'block';
+}
+
+// ── INICIALIZA ────────────────────────────────────────────
+(async function() {
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+
+  if (!id) { showError(); return; }
+
+  try {
+    const snap = await db.collection('acn').doc('orcamentos').get();
+    if (!snap.exists) { showError(); return; }
+
+    const lista = snap.data().lista || [];
+    const orc = lista.find(o => String(o.id) === String(id));
+
+    if (!orc) { showError(); return; }
+
+    renderOrcamento(orc);
+  } catch(e) {
+    console.error(e);
+    showError();
+  }
+})();
+</script>
+</body>
+</html>

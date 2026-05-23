@@ -544,7 +544,6 @@ tbody tr:hover{background:#fafbfc}
     <div class="modal-body" id="modal-pedido-body"></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModalPedido()">Fechar</button>
-      <button class="btn btn-success" id="btn-wa-pedido" onclick="shareWhatsApp('pedido',this)" style="background:#25D366;border-color:#25D366">📲 Enviar WhatsApp</button>
       <button class="btn btn-primary" onclick="printPedido()">🖨️ Imprimir / PDF</button>
     </div>
   </div>
@@ -560,7 +559,7 @@ tbody tr:hover{background:#fafbfc}
     <div class="modal-body" id="modal-body"></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal()">Fechar</button>
-      <button class="btn btn-success" id="btn-wa-orc" onclick="shareWhatsApp('orc',this)" style="background:#25D366;border-color:#25D366">📲 Enviar WhatsApp</button>
+      <button class="btn btn-ghost" id="btn-link-orc" onclick="gerarLinkOrc(this)" style="color:#185FA5;border-color:#B5D4F4">🔗 Gerar Link</button>
       <button class="btn btn-primary" onclick="printOrcamento()">🖨️ Imprimir / PDF</button>
     </div>
   </div>
@@ -1088,6 +1087,7 @@ function renderLista() {
       <span class="quote-total">${fmtBRL(o.subtotal)}</span>
       <div style="display:flex;gap:6px">
         <button class="btn btn-ghost btn-sm" onclick="showOrcamento(${o.id})">👁 Ver</button>
+        <button class="btn btn-ghost btn-sm" onclick="gerarLinkById(${o.id},this)" style="color:#185FA5;border-color:#B5D4F4">🔗</button>
         <button class="btn btn-primary btn-sm" onclick="editarOrcamento(${o.id})">✏️ Editar</button>
         <button class="btn btn-danger btn-sm" onclick="deleteOrcamento(${o.id})">🗑️</button>
       </div>
@@ -1321,6 +1321,51 @@ function getHTMLOrc(o) {
   <div class="footer">Documento gerado automaticamente — AÇO NAVAL · www.aconaval.com</div>
 </div>
 </body></html>`;
+}
+
+function gerarLinkById(id, btn) {
+  const o = orcamentos.find(x => x.id == id); if (!o) return;
+  currentOrcamento = o;
+  gerarLinkOrc(btn);
+}
+
+function gerarLinkOrc(btn) {
+  const o = currentOrcamento; if (!o) return;
+
+  // Gera slug do nome do cliente (ex: "João da Silva" → "Joao-da-Silva")
+  const slug = o.cliente
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/[^a-zA-Z0-9-]/g, '');
+
+  // Monta a URL absoluta para visualizar.html
+  const base = location.href.replace(/\/[^\/]*$/, '/');
+  const url  = `${base}visualizar.html?id=${o.id}`;
+
+  // Monta a mensagem pronta para WhatsApp
+  const num  = String(o.num).padStart(3, '0');
+  const nome = o.cliente.toUpperCase();
+  const msg  = `🔥 *ORÇAMENTO ${num} — ${nome}*\n\nAcesse seu orçamento pelo link abaixo:\n${url}\n\nQualquer dúvida é só me perguntar. 😊`;
+
+  navigator.clipboard.writeText(msg).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✅ Copiado!';
+    btn.style.background = '#EAF3DE';
+    btn.style.borderColor = '#C0DD97';
+    btn.style.color = '#1e7a47';
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.background = '';
+      btn.style.borderColor = '#B5D4F4';
+      btn.style.color = '#185FA5';
+    }, 2500);
+  }).catch(() => {
+    // Fallback: abre em janela pequena para copiar manualmente
+    const num2 = String(o.num).padStart(3,'0');
+    const url2 = `${base}visualizar.html?id=${o.id}`;
+    const msg2 = `🔥 *ORÇAMENTO ${num2} — ${o.cliente.toUpperCase()}*\n\nAcesse seu orçamento pelo link abaixo:\n${url2}\n\nQualquer dúvida é só me perguntar. 😊`;
+    prompt('Copie a mensagem abaixo:', msg2);
+  });
 }
 
 function printOrcamento() {
