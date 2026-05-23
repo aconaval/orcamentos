@@ -1513,7 +1513,22 @@ let currentPedido = null;
 
 // ── MASKS ────────────────────────────────────────────────────────
 let docTipo = 'cpf'; // 'cpf' ou 'cnpj'
-let pedidoEditandoId = null;
+function enviarLinkAssinatura(id, num) {
+  const link = `https://aconaval.github.io/orcamentos/assinar.html?id=${id}`;
+  navigator.clipboard.writeText(link).then(() => {
+    // Mostra feedback visual
+    const btn = document.querySelector(`button[onclick*="enviarLinkAssinatura(${id}"]`);
+    if (btn) {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✅ Copiado!';
+      btn.style.background = '#1a7a44';
+      setTimeout(() => { btn.innerHTML = orig; btn.style.background = '#25D366'; }, 2000);
+    }
+  }).catch(() => {
+    // Fallback: abre em nova aba
+    window.open(link, '_blank');
+  });
+}
 
 function toggleDocTipo(tipo) {
   docTipo = tipo;
@@ -1941,8 +1956,9 @@ function renderListaPedidos(){
         </div>
       </div>
       <span class="quote-total">${fmtBRL(p.subtotal)}</span>
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
         <button class="btn btn-ghost btn-sm" onclick="showPedido(${p.id})">👁 Ver</button>
+        <button class="btn btn-sm" onclick="enviarLinkAssinatura(${p.id},${p.num})" style="background:#25D366;color:#fff;border:none" title="Copiar link para assinatura">🔗 Link Assinatura</button>
         <button class="btn btn-primary btn-sm" onclick="editarPedido(${p.id})">✏️ Editar</button>
         <button class="btn btn-danger btn-sm" onclick="deletePedido(${p.id})">🗑️</button>
       </div>
