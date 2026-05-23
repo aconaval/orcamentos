@@ -1865,49 +1865,48 @@ function editarPedido(id) {
 }
 
 // ── GERAR PEDIDO ─────────────────────────────────────────────────
-async function gerarPedido() {
-  const nome=document.getElementById('pd-nome').value.trim();
-  if(!nome) return alert('Informe o nome do cliente.');
-  const numVal=parseInt(document.getElementById('pd-numero').value);
-  if(!numVal||numVal<1) return alert('Informe o número do pedido.');
-  const validItems=itemsPedido.filter(i=>i.desc.trim());
-  if(!validItems.length) return alert('Adicione ao menos um item.');
+function gerarPedido() {
+  const nome = document.getElementById('pd-nome').value.trim();
+  if (!nome) return alert('Informe o nome do cliente.');
+  const numVal = parseInt(document.getElementById('pd-numero').value);
+  if (!numVal || numVal < 1) return alert('Informe o número do pedido.');
+  const validItems = itemsPedido.filter(i => i.desc && i.desc.trim());
+  if (!validItems.length) return alert('Adicione ao menos um item com descrição.');
 
   const dadosPedido = {
-    num:numVal,
-    nome, cpf:document.getElementById('pd-doc').value.trim(),
-    fone:document.getElementById('pd-fone').value.trim(),
-    data:document.getElementById('pd-data').value,
-    rua:document.getElementById('pd-rua').value.trim(),
-    numEnd:document.getElementById('pd-num').value.trim(),
-    bairro:document.getElementById('pd-bairro').value.trim(),
-    cep:document.getElementById('pd-cep').value.trim(),
-    cidade:document.getElementById('pd-cidade').value.trim(),
-    estado:document.getElementById('pd-estado').value.trim(),
-    prazo:document.getElementById('pd-prazo').value.trim(),
-    obs:document.getElementById('pd-obs').value.trim(),
-    items:JSON.parse(JSON.stringify(validItems)),
-    subtotal:validItems.reduce((s,i)=>s+(parseFloat(i.preco)||0),0),
+    num: numVal,
+    nome,
+    cpf:    document.getElementById('pd-doc').value.trim(),
+    fone:   document.getElementById('pd-fone').value.trim(),
+    data:   document.getElementById('pd-data').value,
+    rua:    document.getElementById('pd-rua').value.trim(),
+    numEnd: document.getElementById('pd-num').value.trim(),
+    bairro: document.getElementById('pd-bairro').value.trim(),
+    cep:    document.getElementById('pd-cep').value.trim(),
+    cidade: document.getElementById('pd-cidade').value.trim(),
+    estado: document.getElementById('pd-estado').value.trim(),
+    prazo:  document.getElementById('pd-prazo').value.trim(),
+    obs:    document.getElementById('pd-obs').value.trim(),
+    items:  JSON.parse(JSON.stringify(validItems)),
+    subtotal: validItems.reduce((s, i) => s + (parseFloat(i.preco) || 0), 0),
   };
 
   if (pedidoEditandoId) {
-    // EDIÇÃO — atualiza pedido existente
     const idx = pedidos.findIndex(p => p.id == pedidoEditandoId);
     if (idx >= 0) {
       pedidos[idx] = { ...pedidos[idx], ...dadosPedido };
-      await savePedidos();
-      updateBadgePedidos();
       const id = pedidos[idx].id;
       pedidoEditandoId = null;
       resetPedidoForm();
+      updateBadgePedidos();
+      savePedidos().catch(e => console.warn('Save:', e));
       showPedido(id);
     }
   } else {
-    // NOVO pedido
-    const pedido = { id:Date.now(), ...dadosPedido, criadoEm:new Date().toISOString() };
+    const pedido = { id: Date.now(), ...dadosPedido, criadoEm: new Date().toISOString() };
     pedidos.push(pedido);
-    await savePedidos();
     updateBadgePedidos();
+    savePedidos().catch(e => console.warn('Save:', e));
     showPedido(pedido.id);
   }
 }
