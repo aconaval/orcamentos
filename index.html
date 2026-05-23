@@ -1510,6 +1510,7 @@ async function deleteSolic(id) {
 let pedidos = [];
 let itemsPedido = [{id:Date.now()+1,prodId:'',desc:'',preco:0}];
 let currentPedido = null;
+let pedidoEditandoId = null;
 
 // ── MASKS ────────────────────────────────────────────────────────
 let docTipo = 'cpf'; // 'cpf' ou 'cnpj'
