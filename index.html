@@ -167,44 +167,116 @@ tbody tr:hover{background:#fafbfc}
 .ov-conditions-title{font-weight:700;font-size:.78rem;margin-bottom:4px;text-transform:uppercase}
 
 @media(max-width:700px){
-  /* Topbar mobile */
-  .topbar{padding:0 10px;height:auto;min-height:56px;flex-wrap:wrap;gap:4px}
-  .logo{font-size:15px}
+  /* ── TOPBAR ── */
+  .topbar{padding:0 10px;height:auto;min-height:52px;flex-wrap:wrap;gap:0}
+  .logo{font-size:14px}
   .logo span{font-size:10px}
-  .fb-status{font-size:10px;padding:2px 7px}
-  /* Nav scroll horizontal */
-  .nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-nowrap:nowrap;width:100%;border-top:1px solid #e0e4e8}
+  .fb-status{font-size:10px;padding:2px 7px;order:3}
+
+  /* ── NAV ── */
+  .nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-wrap:nowrap;width:100%;border-top:1px solid #e0e4e8}
   .nav::-webkit-scrollbar{display:none}
-  .nav-tab{font-size:11px;padding:0 10px;white-space:nowrap;height:44px;flex-shrink:0}
-  /* Pages */
+  .nav-tab{font-size:11px;padding:0 10px;white-space:nowrap;height:42px;flex-shrink:0;min-width:auto}
+
+  /* ── PAGES ── */
   .page{padding:10px}
   .sec-header{flex-direction:column;align-items:flex-start;gap:8px}
-  /* Grids collapse */
+  .sec-title{font-size:15px}
+
+  /* ── GRIDS ── */
   .grid2,.grid3{grid-template-columns:1fr}
-  /* Items row */
-  .item-row{grid-template-columns:1fr}
-  /* Cards */
-  .card{padding:12px}
-  /* Stats */
-  .grid3.stat-grid{grid-template-columns:repeat(3,1fr)}
-  /* Quote cards */
-  .quote-card{flex-wrap:wrap;gap:8px;padding:10px}
-  .quote-card>div:first-child{flex:1;min-width:0}
-  /* Modals full screen on mobile */
-  .modal-overlay{align-items:flex-end;padding:0}
-  .modal{max-width:100%!important;width:100%;border-radius:16px 16px 0 0;max-height:92vh;margin:0}
-  .modal-body{max-height:60vh}
-  .modal-footer{flex-wrap:wrap;gap:8px}
-  .modal-footer .btn{flex:1;justify-content:center;text-align:center;min-width:120px}
-  /* Forms */
-  .form-input{font-size:16px!important} /* prevents zoom on iOS */
-  /* ov-payment */
-  .ov-payment{grid-template-columns:1fr}
-  /* Novo Pedido / Orçamento layout */
+
+  /* Grids inline (style attr) — clientes 2fr 1fr 1fr e similares */
+  div[style*="grid-template-columns:2fr 1fr 1fr"],
+  div[style*="grid-template-columns:2fr 1fr"]{
+    display:flex!important;flex-direction:column!important;gap:8px!important
+  }
+
+  /* Layout principal Orçamento e Pedido */
   #page-novo>div[style*="grid-template-columns:1fr 320px"],
   #page-novo-pedido>div[style*="grid-template-columns:1fr 320px"]{
     display:flex!important;flex-direction:column!important
   }
+
+  /* ── ITEM ROW ── */
+  .item-row{grid-template-columns:1fr;gap:6px}
+  .item-row>*:last-child{display:flex;justify-content:flex-end}
+
+  /* ── CARDS ── */
+  .card{padding:12px}
+
+  /* ── STAT CARDS ── */
+  .grid3{grid-template-columns:repeat(3,1fr)}
+  .stat-card{padding:10px 12px}
+  .stat-value{font-size:17px}
+  .stat-label{font-size:10px}
+
+  /* ── PRODUCTS TABLE ── */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:520px}
+
+  /* Busca e filtros — empilhar */
+  #page-produtos>div[style*="justify-content:space-between"]{
+    flex-direction:column!important;align-items:stretch!important;gap:8px!important
+  }
+  #prod-search{width:100%!important;font-size:16px!important}
+  .cat-filters{flex-wrap:wrap}
+
+  /* ── QUOTE / PEDIDO CARDS ── */
+  .quote-card{flex-wrap:wrap;gap:6px;padding:10px}
+  .quote-card>div:first-child{flex:1;min-width:0}
+  .quote-card>.td-actions,
+  .quote-card>div:last-child{width:100%;justify-content:flex-start;flex-wrap:wrap}
+
+  /* ── BOTÕES ── */
+  .btn{min-height:40px;display:inline-flex;align-items:center;justify-content:center}
+  .btn-sm{min-height:34px}
+
+  /* ── MODAL ── */
+  .modal-overlay{align-items:flex-end;padding:0}
+  .modal{max-width:100%!important;width:100%;border-radius:16px 16px 0 0;max-height:92vh;margin:0}
+  .modal-body{max-height:58vh;overflow-y:auto}
+  .modal-footer{flex-wrap:wrap;gap:8px;padding:10px 14px}
+  .modal-footer .btn{flex:1;justify-content:center;text-align:center;min-width:100px}
+
+  /* ── FORMS ── */
+  .form-input,.form-select,.form-textarea{font-size:16px!important;min-height:44px} /* evita zoom no iOS */
+  .form-textarea{min-height:80px}
+  .form-label{font-size:13px}
+
+  /* ── AUTOCOMPLETE ── */
+  .ac-item{padding:13px 14px}
+
+  /* ── OV-PAYMENT ── */
+  .ov-payment{grid-template-columns:1fr}
+
+  /* ── SLIDE PANEL ── */
+  .slide-panel.open{max-height:2000px} /* mais espaço p/ forms longos */
+
+  /* ── DRAG HANDLE ── */
+  .drag-handle{font-size:20px;padding:0 8px} /* área de toque maior */
+
+  /* ── TOTAL ROW ── */
+  .total-value{font-size:17px}
+  .total-row{flex-wrap:wrap;gap:4px}
+
+  /* ── TOPBAR STATUS ── */
+  #fb-status{width:100%;text-align:center;padding:2px 0;font-size:10px;border-top:1px solid #f0f0f0}
+
+  /* ── SEC-HEADER botão ── */
+  .sec-header>.btn{align-self:flex-start}
+}
+
+@media(max-width:420px){
+  .grid3{grid-template-columns:1fr!important}
+  .stat-value{font-size:18px}
+  .nav-tab{font-size:10px;padding:0 8px}
+  .quote-num{font-size:13px;min-width:36px}
+  .badge{padding:1px 4px;font-size:9px}
+  .btn{font-size:12px}
+  .sec-title{font-size:14px}
+  .page{padding:8px}
+  .card{padding:10px}
 }
 </style>
 </head>
