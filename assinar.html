@@ -2,7 +2,6 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<link rel="manifest" href="manifest.json">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Aço Naval — Confirmar Pedido</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -241,12 +240,6 @@
     </div>
   </div>
 
-  <!-- FOTOS DO PROJETO -->
-  <div class="card" id="projeto-wrap" style="display:none">
-    <div class="card-header">📐 Fotos do Projeto</div>
-    <div class="card-body" id="projeto-body"></div>
-  </div>
-
   <!-- SEÇÃO DE ASSINATURA -->
   <div class="sign-section" id="sign-section">
     <div class="sign-header">✍️ Confirmar e Assinar Pedido</div>
@@ -327,7 +320,7 @@ const fmtDate = iso => { if(!iso) return '—'; const [y,m,d]=iso.split('-'); re
 
 let pedidoAtual = null;
 const prodFotos = {}; // mapa prodId -> foto carregado do acn_produtos
-const prodFotosProj = {}; // mapa prodId -> fotosprojeto[]
+const prodCats  = {}; // mapa prodId -> categoria carregada do acn_produtos
 
 // ── CARREGA PEDIDO ────────────────────────────────────────────────
 async function carregarPedido() {
@@ -345,13 +338,7 @@ async function carregarPedido() {
         ids.map(pid => db.collection('acn_produtos').doc(String(pid)).get())
       );
       prodSnaps.forEach(s => {
-        if (s.exists) {
-          const d = s.data();
-          if (d.id) {
-            if (d.foto) prodFotos[String(d.id)] = d.foto;
-            if (d.fotosprojeto && d.fotosprojeto.length) prodFotosProj[String(d.id)] = d.fotosprojeto;
-          }
-        }
+        if (s.exists) { const d = s.data(); if (d.id && d.foto) prodFotos[String(d.id)] = d.foto; if (d.id && d.cat) prodCats[String(d.id)] = d.cat; }
       });
     }
 
@@ -407,23 +394,6 @@ function renderPedido(p) {
       </div>
     </div>`;
   }).join('');
-
-  // Fotos do Projeto
-  let projetoHtml = '';
-  (p.items||[]).forEach(item => {
-    const fotos = (item.prodId && prodFotosProj[String(item.prodId)]) || [];
-    if (fotos.length) {
-      const nome = (item.desc||'').split('\n')[0] || '';
-      projetoHtml += `<div style="margin-bottom:18px">
-        <div style="font-weight:700;font-size:13px;color:#003366;margin-bottom:10px">📦 ${nome}</div>
-        ${fotos.map(src => `<img src="${src}" style="width:100%;object-fit:contain;border:1px solid #e0e8f0;border-radius:6px;background:#fff;display:block;margin-bottom:10px"/>`).join('')}
-      </div>`;
-    }
-  });
-  if (projetoHtml) {
-    document.getElementById('projeto-body').innerHTML = projetoHtml;
-    document.getElementById('projeto-wrap').style.display = 'block';
-  }
 
   // Financeiro
   const sub = p.subtotal||0;
@@ -496,27 +466,39 @@ async function enviarParaGestao(pedido, nomeAssinante) {
   try {
     const snap = await GESTAO_REF.once('value');
     const dados = snap.val() || {};
-    const vs    = dados.vs || [];   // vendedores
-    const ps    = dados.ps || [];   // pedidos existentes
+    const vs    = dados.vs    || [];   // vendedores
+    const ps    = dados.ps    || [];   // pedidos existentes
+    const prods = dados.prods || [];   // produtos do gestão
 
     if (!vs.length) {
       console.warn('Gestão: nenhum vendedor cadastrado, pedido não enviado.');
       return;
     }
 
+    // Descobre a categoria predominante (maior valor acumulado entre os itens)
+    const totaisPorCat = {};
+    (pedido.items || []).forEach(it => {
+      const cat = prodCats[String(it.prodId)];
+      if (!cat) return;
+      totaisPorCat[cat] = (totaisPorCat[cat] || 0) + (parseFloat(it.preco) || 0);
+    });
+    const catPredominante = Object.keys(totaisPorCat).sort((a,b) => totaisPorCat[b] - totaisPorCat[a])[0] || null;
+    const prodMatch       = catPredominante ? prods.find(p => p.nome.toLowerCase() === catPredominante.toLowerCase()) : null;
+    const prodId          = prodMatch ? prodMatch.id : null;
+
     const agora = new Date();
     const mes   = agora.getMonth() + 1;
     const ano   = agora.getFullYear();
     const gid   = Date.now();
-    const val   = pedido.subtotal || 0;
+    const val   = parseFloat(((pedido.subtotal || 0) * 0.90).toFixed(2));
 
     // Cria uma entrada por vendedor (todos por padrão)
     const novosPedidos = vs.map((v, i) => ({
       id:   gid + i,
       gid,
       num:  String(pedido.num).padStart(3, '0'),
-      prod: null,
-      cid:  pedido.cidade || '',
+      prod: prodId,
+      cid:  (pedido.cidade || '').toUpperCase(),
       uf:   pedido.estado || '',
       val,
       vid:  v.id,
