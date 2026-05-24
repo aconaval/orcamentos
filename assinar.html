@@ -240,6 +240,12 @@
     </div>
   </div>
 
+  <!-- FOTOS DO PROJETO -->
+  <div class="card" id="projeto-wrap" style="display:none">
+    <div class="card-header">📐 Fotos do Projeto</div>
+    <div class="card-body" id="projeto-body"></div>
+  </div>
+
   <!-- SEÇÃO DE ASSINATURA -->
   <div class="sign-section" id="sign-section">
     <div class="sign-header">✍️ Confirmar e Assinar Pedido</div>
@@ -320,6 +326,7 @@ const fmtDate = iso => { if(!iso) return '—'; const [y,m,d]=iso.split('-'); re
 
 let pedidoAtual = null;
 const prodFotos = {}; // mapa prodId -> foto carregado do acn_produtos
+const prodFotosProj = {}; // mapa prodId -> fotosprojeto[]
 
 // ── CARREGA PEDIDO ────────────────────────────────────────────────
 async function carregarPedido() {
@@ -337,7 +344,13 @@ async function carregarPedido() {
         ids.map(pid => db.collection('acn_produtos').doc(String(pid)).get())
       );
       prodSnaps.forEach(s => {
-        if (s.exists) { const d = s.data(); if (d.id && d.foto) prodFotos[String(d.id)] = d.foto; }
+        if (s.exists) {
+          const d = s.data();
+          if (d.id) {
+            if (d.foto) prodFotos[String(d.id)] = d.foto;
+            if (d.fotosprojeto && d.fotosprojeto.length) prodFotosProj[String(d.id)] = d.fotosprojeto;
+          }
+        }
       });
     }
 
@@ -393,6 +406,23 @@ function renderPedido(p) {
       </div>
     </div>`;
   }).join('');
+
+  // Fotos do Projeto
+  let projetoHtml = '';
+  (p.items||[]).forEach(item => {
+    const fotos = (item.prodId && prodFotosProj[String(item.prodId)]) || [];
+    if (fotos.length) {
+      const nome = (item.desc||'').split('\n')[0] || '';
+      projetoHtml += `<div style="margin-bottom:18px">
+        <div style="font-weight:700;font-size:13px;color:#003366;margin-bottom:10px">📦 ${nome}</div>
+        ${fotos.map(src => `<img src="${src}" style="width:100%;object-fit:contain;border:1px solid #e0e8f0;border-radius:6px;background:#fff;display:block;margin-bottom:10px"/>`).join('')}
+      </div>`;
+    }
+  });
+  if (projetoHtml) {
+    document.getElementById('projeto-body').innerHTML = projetoHtml;
+    document.getElementById('projeto-wrap').style.display = 'block';
+  }
 
   // Financeiro
   const sub = p.subtotal||0;

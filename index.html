@@ -266,6 +266,18 @@ tbody tr:hover{background:#fafbfc}
           <button class="btn btn-danger btn-sm" type="button" onclick="removeFoto()">✕ Remover</button>
         </div>
       </div>
+      <div class="form-group">
+        <label class="form-label">📐 Fotos do Projeto <span style="font-weight:400;color:#888;font-size:11px">(medidas, detalhes e especificações — aparece abaixo do valor e na 3ª página ao imprimir)</span></label>
+        <div id="projeto-thumbs-wrap" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px"></div>
+        <div class="photo-upload-area" id="projeto-drop" onclick="document.getElementById('inp-foto-projeto').click()">
+          <div id="projeto-placeholder">
+            <div style="font-size:22px;margin-bottom:6px">📐</div>
+            <div style="font-size:12px;color:#888">Clique para adicionar fotos do projeto</div>
+            <div style="font-size:11px;color:#bbb;margin-top:3px">JPG, PNG ou WEBP — máx. 2MB cada — pode selecionar várias</div>
+          </div>
+        </div>
+        <input type="file" id="inp-foto-projeto" accept="image/*" multiple style="display:none" onchange="onFotoProjetoChange(event)"/>
+      </div>
       <div style="display:flex;gap:8px">
         <button class="btn btn-primary" onclick="saveProduto()">💾 Salvar Produto</button>
         <button class="btn btn-ghost" onclick="cancelProdForm()">Cancelar</button>
@@ -755,6 +767,8 @@ function clearProdForm() {
   document.getElementById('prod-form-title').textContent = 'Novo Produto';
   currentFotoBase64 = null;
   resetFotoUI();
+  currentFotosProjetoBase64 = [];
+  renderProjetoThumbs();
 }
 let currentFotoBase64 = null;
 function onFotoChange(e) {
@@ -787,6 +801,35 @@ function resetFotoUI() {
 }
 function removeFoto() { currentFotoBase64 = null; resetFotoUI(); }
 
+// ── FOTOS DO PROJETO ──────────────────────────────────────────────
+let currentFotosProjetoBase64 = [];
+async function onFotoProjetoChange(e) {
+  const files = Array.from(e.target.files);
+  for (const file of files) {
+    if (file.size > 2 * 1024 * 1024) { alert('Foto muito grande. Use uma imagem até 2MB.'); continue; }
+    const reader = new FileReader();
+    const base64 = await new Promise(res => { reader.onload = ev => res(ev.target.result); reader.readAsDataURL(file); });
+    const compressed = await comprimirFoto(base64, 250);
+    currentFotosProjetoBase64.push(compressed);
+    renderProjetoThumbs();
+  }
+  e.target.value = '';
+}
+function removeFotoProjeto(idx) {
+  currentFotosProjetoBase64.splice(idx, 1);
+  renderProjetoThumbs();
+}
+function renderProjetoThumbs() {
+  const wrap = document.getElementById('projeto-thumbs-wrap');
+  if (!wrap) return;
+  if (!currentFotosProjetoBase64.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = currentFotosProjetoBase64.map((src, idx) => `
+    <div style="position:relative;display:inline-block">
+      <img src="${src}" style="width:80px;height:80px;object-fit:cover;border-radius:4px;border:1px solid #e0e4e8"/>
+      <button onclick="removeFotoProjeto(${idx})" style="position:absolute;top:-6px;right:-6px;background:#A32D2D;color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;line-height:18px;padding:0;text-align:center">✕</button>
+    </div>`).join('');
+}
+
 function saveProduto() {
   const nome = document.getElementById('inp-nome').value.trim();
   const dim  = document.getElementById('inp-dim').value.trim();
@@ -801,9 +844,10 @@ function saveProduto() {
     if (idx >= 0) {
       produtos[idx] = { ...produtos[idx], nome, dim, preco, cat, obs };
       if (currentFotoBase64 !== null) produtos[idx].foto = currentFotoBase64;
+      produtos[idx].fotosprojeto = [...currentFotosProjetoBase64];
     }
   } else {
-    produtos.push({ id: Date.now(), nome, dim, preco, cat, obs, foto: currentFotoBase64 || '' });
+    produtos.push({ id: Date.now(), nome, dim, preco, cat, obs, foto: currentFotoBase64 || '', fotosprojeto: [...currentFotosProjetoBase64] });
   }
   save(); renderProdutos(); cancelProdForm();
 }
@@ -819,6 +863,8 @@ function editProduto(id) {
   currentFotoBase64 = null; // preserve existing unless changed
   if (p.foto) { applyFotoUI(p.foto); }
   else resetFotoUI();
+  currentFotosProjetoBase64 = p.fotosprojeto ? [...p.fotosprojeto] : [];
+  renderProjetoThumbs();
   toggleProdForm(true);
   document.getElementById('prod-form-panel').scrollIntoView({behavior:'smooth'});
 }
@@ -1185,6 +1231,34 @@ function getHTMLOrc(o) {
   const prazoStr2 = prazoDate2.toLocaleDateString('pt-BR');
   const foneHtml = o.fone ? ` &nbsp;·&nbsp; 📞 ${o.fone}` : '';
 
+  // Fotos do projeto (buscadas do catálogo via prodId)
+  const projetoItens = o.items.reduce((acc, item) => {
+    const prod = item.prodId ? (produtos.find(p => p.id == item.prodId) || {}) : {};
+    const fotos = (prod.fotosprojeto || []).filter(Boolean);
+    if (fotos.length) acc.push({ nome: item.desc ? item.desc.split('\n')[0] : '', fotos });
+    return acc;
+  }, []);
+  const projetoInlineHtml = projetoItens.length ? `
+    <div class="projeto-inline" style="margin-top:18px;border:1px solid #B5D4F4;border-radius:6px;padding:12px 16px;background:#f8fbff">
+      <div style="font-size:10pt;text-transform:uppercase;font-weight:700;color:#185FA5;letter-spacing:.5px;margin-bottom:12px">📐 Fotos do Projeto</div>
+      ${projetoItens.map(it => `
+        <div style="margin-bottom:12px">
+          <div style="font-weight:700;font-size:10pt;color:#003366;margin-bottom:6px">${it.nome}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            ${it.fotos.map(src => `<img src="${src}" style="width:130px;height:130px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#fff"/>`).join('')}
+          </div>
+        </div>`).join('')}
+    </div>` : '';
+  const projetoPrintHtml = projetoItens.length ? `
+    <div class="projeto-print-page" style="page-break-before:always;margin-top:0">
+      <div style="background:#003366;color:#fff;padding:14px 16px;font-size:20pt;font-weight:700;text-align:center;letter-spacing:3px;margin-bottom:24px;border-radius:4px 4px 0 0">PROJETO</div>
+      ${projetoItens.map(it => `
+        <div style="margin-bottom:28px">
+          <div style="font-weight:700;font-size:13pt;color:#003366;border-bottom:2px solid #003366;padding-bottom:6px;margin-bottom:14px">${it.nome}</div>
+          ${it.fotos.map(src => `<div style="margin-bottom:12px;text-align:center"><img src="${src}" style="max-width:100%;max-height:220mm;object-fit:contain"/></div>`).join('')}
+        </div>`).join('')}
+    </div>` : '';
+
 
   return `<!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="utf-8">
@@ -1268,6 +1342,8 @@ function getHTMLOrc(o) {
   .info-cell-val { font-size:12pt; font-weight:700; color:#111 }
   img { max-width:100%; -webkit-print-color-adjust:exact; print-color-adjust:exact }
   .footer { margin-top:20px; text-align:center; font-size:12pt; color:#bbb; border-top:1px solid #eee; padding-top:10px }
+  @media screen { .projeto-print-page { display:none !important } }
+  @media print  { .projeto-inline    { display:none !important } }
 </style>
 </head>
 <body>
@@ -1351,8 +1427,13 @@ function getHTMLOrc(o) {
     O cliente deverá garantir a presença de no mínimo duas pessoas para auxílio na descarga dos produtos na entrega.
   </div>
 
+  ${projetoInlineHtml}
+
   <div class="footer">Documento gerado automaticamente — AÇO NAVAL · www.aconaval.com</div>
 </div>
+
+${projetoPrintHtml}
+
 </body></html>`;
 }
 
@@ -2124,6 +2205,34 @@ function getHTMLPed(p) {
   }).join('');
   const obsHtml=p.obs?`<div class="obs-box"><strong>Observação:</strong> ${p.obs}</div>`:'';
   const pdfTitle = 'PEDIDO ' + String(p.num).padStart(3,'0') + ([p.cidade,p.estado].filter(Boolean).length ? ' - ' + [p.cidade.toUpperCase(),p.estado].filter(Boolean).join(' - ') : '');
+
+  // Fotos do projeto (buscadas do catálogo via prodId)
+  const projetoItensPed = p.items.reduce((acc, item) => {
+    const prod = item.prodId ? (produtos.find(x => x.id == item.prodId) || {}) : {};
+    const fotos = (prod.fotosprojeto || []).filter(Boolean);
+    if (fotos.length) acc.push({ nome: item.desc ? item.desc.split('\n')[0] : '', fotos });
+    return acc;
+  }, []);
+  const projetoInlinePedHtml = projetoItensPed.length ? `
+    <div class="projeto-inline" style="margin-top:18px;border:1px solid #B5D4F4;border-radius:6px;padding:12px 16px;background:#f8fbff">
+      <div style="font-size:10pt;text-transform:uppercase;font-weight:700;color:#185FA5;letter-spacing:.5px;margin-bottom:12px">📐 Fotos do Projeto</div>
+      ${projetoItensPed.map(it => `
+        <div style="margin-bottom:12px">
+          <div style="font-weight:700;font-size:10pt;color:#003366;margin-bottom:6px">${it.nome}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            ${it.fotos.map(src => `<img src="${src}" style="width:130px;height:130px;object-fit:contain;border:1px solid #ddd;border-radius:4px;background:#fff"/>`).join('')}
+          </div>
+        </div>`).join('')}
+    </div>` : '';
+  const projetoPrintPedHtml = projetoItensPed.length ? `
+    <div class="projeto-print-page" style="page-break-before:always;margin-top:0">
+      <div style="background:#003366;color:#fff;padding:14px 16px;font-size:20pt;font-weight:700;text-align:center;letter-spacing:3px;margin-bottom:24px;border-radius:4px 4px 0 0">PROJETO</div>
+      ${projetoItensPed.map(it => `
+        <div style="margin-bottom:28px">
+          <div style="font-weight:700;font-size:13pt;color:#003366;border-bottom:2px solid #003366;padding-bottom:6px;margin-bottom:14px">${it.nome}</div>
+          ${it.fotos.map(src => `<div style="margin-bottom:12px;text-align:center"><img src="${src}" style="max-width:100%;max-height:220mm;object-fit:contain"/></div>`).join('')}
+        </div>`).join('')}
+    </div>` : '';
   return `<!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="utf-8">
 <title>${pdfTitle}</title>
@@ -2173,6 +2282,8 @@ function getHTMLPed(p) {
   .sign-cell:last-child{padding-right:0}
   .sign-line{border-top:1.5px solid #003366;margin-bottom:6px}
   .sign-name{font-size:11pt;font-weight:700;color:#003366}
+  @media screen { .projeto-print-page { display:none !important } }
+  @media print  { .projeto-inline    { display:none !important } }
   img{max-width:100%;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 </style>
 </head><body>
@@ -2245,6 +2356,8 @@ function getHTMLPed(p) {
     A instalação dos dutos de chaminé é de responsabilidade do cliente, devendo ser executada por profissional habilitado (funileiro, calheiro ou pedreiro).
     O cliente deverá garantir a presença de no mínimo duas pessoas para auxílio na descarga dos produtos na entrega.
   </div>
+
+  ${projetoInlinePedHtml}
 
   <div class="sign-grid">
     <div class="sign-cell">
@@ -2349,6 +2462,9 @@ function getHTMLPed(p) {
   </div><!-- end margin wrapper -->
 
 </div>
+
+${projetoPrintPedHtml}
+
 </body></html>`;
 }
 

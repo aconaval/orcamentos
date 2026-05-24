@@ -245,6 +245,11 @@ select.fform-input{cursor:pointer}
       </div>
     </div>
 
+    <div class="card" id="projeto-wrap" style="display:none">
+      <div class="card-header">📐 Fotos do Projeto</div>
+      <div class="card-body" id="projeto-body"></div>
+    </div>
+
     <div class="doc-footer">
       Documento gerado pela <strong>Aço Naval</strong> · <a href="https://www.aconaval.com">www.aconaval.com</a>
     </div>
@@ -457,6 +462,26 @@ function renderOrcamento(o) {
     document.getElementById('obs-wrap').style.display = 'block';
   }
 
+  // Fotos do Projeto
+  var projetoHtml = '';
+  for (var pi = 0; pi < o.items.length; pi++) {
+    var pitem = o.items[pi];
+    var pfotos = (pitem.prodId && prodFotosProj[String(pitem.prodId)]) || [];
+    if (pfotos.length) {
+      var pnome = (pitem.desc || '').split('\n')[0] || '';
+      projetoHtml += '<div style="margin-bottom:18px">';
+      projetoHtml += '<div style="font-weight:700;font-size:13px;color:#003366;margin-bottom:10px">📦 ' + pnome + '</div>';
+      for (var pj = 0; pj < pfotos.length; pj++) {
+        projetoHtml += '<img src="' + pfotos[pj] + '" style="width:100%;object-fit:contain;border:1px solid #e0e8f0;border-radius:6px;background:#fff;display:block;margin-bottom:10px"/>';
+      }
+      projetoHtml += '</div>';
+    }
+  }
+  if (projetoHtml) {
+    document.getElementById('projeto-body').innerHTML = projetoHtml;
+    document.getElementById('projeto-wrap').style.display = 'block';
+  }
+
   // Pagamento
   var avista  = o.subtotal * 0.90;
   var parcela = Math.ceil(o.subtotal / 12 * 100) / 100;
@@ -476,6 +501,7 @@ function renderOrcamento(o) {
 
 // Mapa prodId -> foto, preenchido ao carregar
 var prodFotos = {};
+var prodFotosProj = {}; // mapa prodId -> fotosprojeto[]
 
 (async function() {
   var params = new URLSearchParams(location.search);
@@ -490,7 +516,13 @@ var prodFotos = {};
         ids.map(function(pid) { return db.collection('acn_produtos').doc(String(pid)).get(); })
       );
       prodSnaps.forEach(function(s) {
-        if (s.exists) { var d = s.data(); if (d.id && d.foto) prodFotos[String(d.id)] = d.foto; }
+        if (s.exists) {
+          var d = s.data();
+          if (d.id) {
+            if (d.foto) prodFotos[String(d.id)] = d.foto;
+            if (d.fotosprojeto && d.fotosprojeto.length) prodFotosProj[String(d.id)] = d.fotosprojeto;
+          }
+        }
       });
     }
 
