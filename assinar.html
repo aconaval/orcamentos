@@ -487,7 +487,8 @@ async function enviarParaGestao(pedido, nomeAssinante) {
     const prodId          = prodMatch ? prodMatch.id : null;
 
     const agora = new Date();
-    const mes   = agora.getMonth() + 1;
+    const MS_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const mes   = MS_NAMES[agora.getMonth()];
     const ano   = agora.getFullYear();
     const gid   = Date.now();
     const val   = parseFloat(((pedido.subtotal || 0) * 0.90).toFixed(2));
