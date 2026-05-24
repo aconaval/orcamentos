@@ -387,8 +387,10 @@ function buildItemHtml(item, idx) {
   var lines = (item.desc || '').split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
   var nome  = lines[0] || '';
   var dims  = lines.slice(1).join(' · ');
-  var fotoHtml = item.foto
-    ? '<img src="' + item.foto + '" class="item-foto"/>'
+  // Busca foto pelo prodId (fotos removidas dos itens para economizar espaço no Firestore)
+  var fotoSrc = item.foto || (item.prodId ? prodFotos[String(item.prodId)] : '') || '';
+  var fotoHtml = fotoSrc
+    ? '<img src="' + fotoSrc + '" class="item-foto"/>'
     : '<div class="item-foto-ph">📦</div>';
   var precoHtml = item.preco > 0
     ? '<div class="item-preco">' + fmtBRL(item.preco) + '</div>'
@@ -472,11 +474,26 @@ function renderOrcamento(o) {
   showForm();
 }
 
+// Mapa prodId -> foto, preenchido ao carregar
+var prodFotos = {};
+
 (async function() {
   var params = new URLSearchParams(location.search);
   var id = params.get('id');
   if (!id) { showError(); return; }
   try {
+    // Carrega produtos para obter as fotos (removidas dos itens para reduzir tamanho)
+    var idxSnap = await db.collection('acn').doc('produtos_index').get();
+    if (idxSnap.exists) {
+      var ids = idxSnap.data().ids || [];
+      var prodSnaps = await Promise.all(
+        ids.map(function(pid) { return db.collection('acn_produtos').doc(String(pid)).get(); })
+      );
+      prodSnaps.forEach(function(s) {
+        if (s.exists) { var d = s.data(); if (d.id && d.foto) prodFotos[String(d.id)] = d.foto; }
+      });
+    }
+
     var snap = await db.collection('acn').doc('orcamentos').get();
     if (!snap.exists) { showError(); return; }
     var lista = snap.data().lista || [];

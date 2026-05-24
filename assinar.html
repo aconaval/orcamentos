@@ -319,6 +319,7 @@ const fmtBRL = v => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BR
 const fmtDate = iso => { if(!iso) return '—'; const [y,m,d]=iso.split('-'); return `${d}/${m}/${y}`; };
 
 let pedidoAtual = null;
+const prodFotos = {}; // mapa prodId -> foto carregado do acn_produtos
 
 // ── CARREGA PEDIDO ────────────────────────────────────────────────
 async function carregarPedido() {
@@ -328,6 +329,18 @@ async function carregarPedido() {
   if (!pedidoId) { showScreen('erro'); return; }
 
   try {
+    // Carrega fotos dos produtos (removidas dos itens para reduzir tamanho no Firestore)
+    const idxSnap = await db.collection('acn').doc('produtos_index').get();
+    if (idxSnap.exists) {
+      const ids = idxSnap.data().ids || [];
+      const prodSnaps = await Promise.all(
+        ids.map(pid => db.collection('acn_produtos').doc(String(pid)).get())
+      );
+      prodSnaps.forEach(s => {
+        if (s.exists) { const d = s.data(); if (d.id && d.foto) prodFotos[String(d.id)] = d.foto; }
+      });
+    }
+
     const snap = await db.collection('acn').doc('pedidos').get();
     if (!snap.exists) { showScreen('erro'); return; }
     const lista = snap.data().lista || [];
@@ -368,8 +381,10 @@ function renderPedido(p) {
     const lines = (item.desc||'').split('\n').filter(Boolean);
     const nome = lines[0]||'Item';
     const dims = lines.slice(1).join(' · ');
+    // Busca foto pelo prodId (fotos removidas dos itens para economizar espaço no Firestore)
+    const fotoSrc = item.foto || (item.prodId ? prodFotos[String(item.prodId)] : '') || '';
     return `<div class="item-row">
-      ${item.foto ? `<img src="${item.foto}" class="item-foto"/>` : `<div class="item-foto-ph">📦</div>`}
+      ${fotoSrc ? `<img src="${fotoSrc}" class="item-foto"/>` : `<div class="item-foto-ph">📦</div>`}
       <div style="flex:1">
         <div class="item-num">Item ${String(i+1).padStart(2,'0')}</div>
         <div class="item-nome">${nome}</div>
