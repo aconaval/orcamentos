@@ -65,12 +65,15 @@ body{font-family:Arial,Helvetica,sans-serif;background:#f0f4f8;min-height:100vh;
 .total-main{display:flex;justify-content:space-between;align-items:center;font-size:17px;font-weight:700;color:#1a7a44;padding-top:4px}
 
 /* PAGAMENTO */
-.pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.pay-cell{background:#f8fafc;border:1px solid #e0e8f0;border-radius:8px;padding:12px 14px;text-align:center}
-.pay-type{font-size:12px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px}
-.pay-value{font-size:22px;font-weight:700;color:#003366}
+.pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.pay-cell{background:#f0f4ff;border:1px solid #c0d0f0;border-radius:8px;padding:14px 12px;text-align:center}
+.pay-cell-green{background:#eef9f2;border:2px solid #1a7a44}
+.pay-type{font-size:12px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px}
+.pay-value{font-size:26px;font-weight:800;color:#003366;line-height:1.1}
 .pay-value.green{color:#1a7a44}
-.pay-sub{font-size:11px;color:#888;margin-top:4px;line-height:1.4}
+.pay-parcelas{font-size:14px;font-weight:700;color:#003366;margin-top:6px;line-height:1.3}
+.pay-note{font-size:11px;color:#888;margin-top:6px;line-height:1.4;font-style:italic}
+.pay-destaque{font-size:13px;font-weight:700;color:#1a7a44;margin-top:8px;line-height:1.4}
 
 /* CONDIÇÕES */
 .cond-text{font-size:13px;color:#666;line-height:1.7}
@@ -219,23 +222,17 @@ select.fform-input{cursor:pointer}
     <div class="card">
       <div class="card-header">💰 Formas de Pagamento</div>
       <div class="card-body">
-        <div class="total-box">
-          <div class="total-main">
-            <span>Valor total do orçamento</span>
-            <span id="pay-total-cartao">—</span>
-          </div>
-          
-        </div>
         <div class="pay-grid">
           <div class="pay-cell">
-            <div class="pay-type">💳 Cartão</div>
+            <div class="pay-type">💳 Cartão de Crédito</div>
             <div class="pay-value" id="pay-cartao">—</div>
-            <div class="pay-sub" id="pay-parcelas">Até 12x sem juros</div>
+            <div class="pay-parcelas" id="pay-parcelas">—</div>
+            <div class="pay-note">O motorista traz a máquina de cartão</div>
           </div>
-          <div class="pay-cell">
-            <div class="pay-type">💰 À Vista PIX</div>
+          <div class="pay-cell pay-cell-green">
+            <div class="pay-type">💰 À Vista — PIX</div>
             <div class="pay-value green" id="pay-avista">—</div>
-            <div class="pay-sub">10% de desconto<br>contato.aconaval@gmail.com</div>
+            <div class="pay-destaque">Ganhe 10% de desconto<br>pagando à vista ao receber</div>
           </div>
         </div>
       </div>
@@ -447,7 +444,7 @@ function renderOrcamento(o) {
     itemsHtml += buildItemHtml(o.items[i], i);
   }
   itemsHtml += '<div class="item-total-bar">'
-    + '<span style="font-size:12px;text-transform:uppercase;color:#3B6D11;font-weight:700;letter-spacing:.5px">Total do Pedido</span>'
+    + '<span style="font-size:12px;text-transform:uppercase;color:#3B6D11;font-weight:700;letter-spacing:.5px">Total do Orçamento</span>'
     + '<span style="font-size:16px;font-weight:700;color:#1a7a44">' + fmtBRL(o.subtotal) + '</span>'
     + '</div>';
   document.getElementById('items-body').innerHTML = itemsHtml;
@@ -461,10 +458,10 @@ function renderOrcamento(o) {
   // Pagamento
   var avista  = o.subtotal * 0.90;
   var parcela = Math.ceil(o.subtotal / 12 * 100) / 100;
-  document.getElementById('pay-total-cartao').textContent     = fmtBRL(o.subtotal);
+
   
   document.getElementById('pay-cartao').textContent            = fmtBRL(o.subtotal);
-  document.getElementById('pay-parcelas').textContent          = 'Até 12x de ' + fmtBRL(parcela);
+  document.getElementById('pay-parcelas').textContent          = '12x de ' + fmtBRL(parcela) + ' sem juros';
   document.getElementById('pay-avista').textContent            = fmtBRL(avista);
 
   currentOrcId  = o.id;
