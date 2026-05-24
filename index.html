@@ -662,10 +662,18 @@ async function save() {
     const colProd = db.collection('acn_produtos');
     const colOrc  = db.collection('acn');
 
-    // Limpa produtos antigos e salva os atuais
+    // Bug fix: remove fotos de TODOS os itens antes de gravar no Firestore.
+    // Cada foto ocupa ~150KB — com 10+ orcamentos o documento passa de 1MB (limite
+    // do Firestore), o save() falha silenciosamente e o orcamento some no F5.
+    const orcSemFoto = orcamentos.map(function(orc) {
+      return Object.assign({}, orc, {
+        items: (orc.items || []).map(function(item) {
+          var i = Object.assign({}, item); delete i.foto; return i;
+        })
+      });
+    });
     await Promise.all([
-      colOrc.doc('orcamentos').set({ lista: orcamentos }),
-      // salva lista de IDs + dados sem foto
+      colOrc.doc('orcamentos').set({ lista: orcSemFoto }),
       colOrc.doc('produtos_index').set({ ids: produtos.map(p => p.id) })
     ]);
 
@@ -896,6 +904,15 @@ function dragDrop(e) {
 }
 
 function initNovoForm() {
+  // Bug fix: limpa o modo de edição ao entrar na aba (evita editar orçamento
+  // antigo quando o usuário navega sem salvar)
+  if (orcamentoEditandoId) {
+    orcamentoEditandoId = null;
+    const btn = document.querySelector('#page-novo .btn-primary[onclick="gerarOrcamento()"]');
+    if (btn) { btn.textContent = '📄 Gerar Orçamento'; btn.style.background = ''; }
+    const title = document.querySelector('#page-novo .sec-title');
+    if (title) title.firstChild.textContent = 'Novo Orçamento ';
+  }
   if (!document.getElementById('oc-data').value)
     document.getElementById('oc-data').value = new Date().toISOString().slice(0,10);
   if (!items.length) addItem();
@@ -1040,11 +1057,18 @@ function gerarOrcamento() {
   const validItems = items.filter(i => i.desc.trim());
   if (!validItems.length) return alert('Adicione ao menos um item com descrição.');
 
+  // Bug fix: remove fotos embutidas dos itens para não exceder o limite de 1MB
+  // do Firestore — fotos ficam na coleção acn_produtos (referenciadas por prodId)
+  const itemsSemFoto = JSON.parse(JSON.stringify(validItems)).map(item => {
+    delete item.foto;
+    return item;
+  });
+
   const dados = {
     cliente,
     fone: document.getElementById('oc-fone').value.trim(),
     data: document.getElementById('oc-data').value,
-    items: JSON.parse(JSON.stringify(validItems)),
+    items: itemsSemFoto,
     subtotal: validItems.reduce((s,i)=>s+(parseFloat(i.preco)||0),0),
     obs: document.getElementById('oc-obs').value.trim(),
   };
@@ -1063,7 +1087,14 @@ function gerarOrcamento() {
   } else {
     // Novo orçamento
     const orc = { id: Date.now(), num: orcamentos.length + 1, ...dados, criadoEm: new Date().toISOString() };
-    orcamentos.push(orc); save(); updateBadge(); showOrcamento(orc.id);
+    orcamentos.push(orc);
+    updateBadge();
+    showOrcamento(orc.id);
+    // Bug fix: salva com handler de erro visível ao usuário
+    save().catch(e => {
+      console.error('Erro ao salvar orçamento:', e);
+      setStatus('⚠️ Erro ao salvar — verifique sua conexão', 'erro');
+    });
   }
 }
 
@@ -1131,12 +1162,14 @@ function getHTMLOrc(o) {
     const nomeB = `<strong>${lines[0]}</strong>`;
     const restoB = lines.slice(1).join('<br>');
     const descHtmlB = nomeB + (restoB ? '<br>' + restoB : '');
+    // Bug fix: foto buscada do catálogo pelo prodId (não embutida no item)
+    const prodFoto = item.prodId ? (produtos.find(p => p.id == item.prodId)||{}).foto || '' : (item.foto||'');
     return `
     <tr>
       <td class="idx" style="vertical-align:top;padding-top:10px">${String(idx+1).padStart(2,'0')}</td>
       <td>
         <div style="display:table;width:100%">
-          ${item.foto ? `<div style="display:table-cell;width:90px;vertical-align:top;padding-right:12px"><img src="${item.foto}" style="width:80px;height:80px;object-fit:contain;background:#fff"/></div>` : ''}
+          ${prodFoto ? `<div style="display:table-cell;width:90px;vertical-align:top;padding-right:12px"><img src="${prodFoto}" style="width:80px;height:80px;object-fit:contain;background:#fff"/></div>` : ''}
           <div style="display:table-cell;vertical-align:top">${descHtmlB}</div>
         </div>
       </td>
