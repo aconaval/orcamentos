@@ -404,6 +404,24 @@ function buildItemHtml(item, idx) {
   var dimsHtml = dims
     ? '<div class="item-dim">' + dims + '</div>'
     : '';
+  // Composição do conjunto — usa conjComponents (embutido no item) com fallback para prodDados
+  var conjHtml = '';
+  var compList = item.conjComponents && item.conjComponents.length ? item.conjComponents : null;
+  if (!compList && item.prodId) {
+    var pd = prodDados[String(item.prodId)];
+    if (pd && pd.tipoProd === 'conjunto' && pd.componentes && pd.componentes.length) {
+      compList = pd.componentes.map(function(c) {
+        var cp = prodDados[String(c.prodId)];
+        return cp ? { nome: cp.nome } : null;
+      }).filter(Boolean);
+    }
+  }
+  if (compList && compList.length) {
+    var rowsHtml = compList.map(function(c) {
+      return '<div class="conj-comp-row"><span class="conj-comp-nome">' + c.nome + '</span></div>';
+    }).join('');
+    conjHtml = '<div class="conj-comp-wrap"><div class="conj-comp-title">Composição do conjunto</div>' + rowsHtml + '</div>';
+  }
   var numStr = (idx + 1 < 10 ? '0' : '') + (idx + 1);
   return '<div class="item-row">'
     + fotoHtml
@@ -411,6 +429,7 @@ function buildItemHtml(item, idx) {
     + '<div class="item-num">Item ' + numStr + '</div>'
     + '<div class="item-nome">' + nome + '</div>'
     + dimsHtml
+    + conjHtml
     + precoHtml
     + '</div>'
     + '</div>';
@@ -503,6 +522,7 @@ function renderOrcamento(o) {
 // Mapa prodId -> foto, preenchido ao carregar
 var prodFotos = {};
 var prodFotosProj = {}; // mapa prodId -> fotosprojeto[]
+var prodDados = {};     // mapa prodId -> { tipoProd, componentes, nome }
 
 (async function() {
   var params = new URLSearchParams(location.search);
@@ -522,6 +542,7 @@ var prodFotosProj = {}; // mapa prodId -> fotosprojeto[]
           if (d.id) {
             if (d.foto) prodFotos[String(d.id)] = d.foto;
             if (d.fotosprojeto && d.fotosprojeto.length) prodFotosProj[String(d.id)] = d.fotosprojeto;
+            prodDados[String(d.id)] = { tipoProd: d.tipoProd, componentes: d.componentes||[], nome: d.nome };
           }
         }
       });

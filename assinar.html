@@ -46,6 +46,9 @@
   .item-nome{font-size:13px;font-weight:700;color:#111}
   .item-dim{font-size:12px;color:#666;margin-top:2px;line-height:1.4}
   .item-preco{font-size:13px;font-weight:700;color:#003366;margin-top:4px}
+  .conj-comp-wrap{margin-top:7px;border-top:1px dashed #ddd;padding-top:6px}
+  .conj-comp-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#999;margin-bottom:4px}
+  .conj-comp-row{font-size:11px;color:#444;padding:2px 0}
 
   /* TOTAL */
   .total-box{background:#eef3fa;border-radius:8px;padding:12px 14px;margin-top:4px}
@@ -321,6 +324,7 @@ const fmtDate = iso => { if(!iso) return '—'; const [y,m,d]=iso.split('-'); re
 let pedidoAtual = null;
 const prodFotos = {}; // mapa prodId -> foto carregado do acn_produtos
 const prodCats  = {}; // mapa prodId -> categoria carregada do acn_produtos
+const prodDados = {}; // mapa prodId -> { tipoProd, componentes, nome }
 
 // ── CARREGA PEDIDO ────────────────────────────────────────────────
 async function carregarPedido() {
@@ -338,7 +342,7 @@ async function carregarPedido() {
         ids.map(pid => db.collection('acn_produtos').doc(String(pid)).get())
       );
       prodSnaps.forEach(s => {
-        if (s.exists) { const d = s.data(); if (d.id && d.foto) prodFotos[String(d.id)] = d.foto; if (d.id && d.cat) prodCats[String(d.id)] = d.cat; }
+        if (s.exists) { const d = s.data(); if (d.id && d.foto) prodFotos[String(d.id)] = d.foto; if (d.id && d.cat) prodCats[String(d.id)] = d.cat; if (d.id) prodDados[String(d.id)] = { tipoProd: d.tipoProd, componentes: d.componentes||[], nome: d.nome }; }
       });
     }
 
@@ -384,12 +388,28 @@ function renderPedido(p) {
     const dims = lines.slice(1).join(' · ');
     // Busca foto pelo prodId (fotos removidas dos itens para economizar espaço no Firestore)
     const fotoSrc = item.foto || (item.prodId ? prodFotos[String(item.prodId)] : '') || '';
+    // Composição do conjunto — usa conjComponents (embutido no item) com fallback para prodDados
+    let conjHtml = '';
+    let compList = (item.conjComponents && item.conjComponents.length) ? item.conjComponents : null;
+    if (!compList && item.prodId) {
+      const pd = prodDados[String(item.prodId)];
+      if (pd && pd.tipoProd === 'conjunto' && pd.componentes && pd.componentes.length) {
+        compList = pd.componentes.map(c => {
+          const cp = prodDados[String(c.prodId)];
+          return cp ? { nome: cp.nome } : null;
+        }).filter(Boolean);
+      }
+    }
+    if (compList && compList.length) {
+      conjHtml = `<div class="conj-comp-wrap"><div class="conj-comp-title">Composição do conjunto</div>${compList.map(c=>`<div class="conj-comp-row">${c.nome}</div>`).join('')}</div>`;
+    }
     return `<div class="item-row">
       ${fotoSrc ? `<img src="${fotoSrc}" class="item-foto"/>` : `<div class="item-foto-ph">📦</div>`}
       <div style="flex:1">
         <div class="item-num">Item ${String(i+1).padStart(2,'0')}</div>
         <div class="item-nome">${nome}</div>
         ${dims?`<div class="item-dim">${dims}</div>`:''}
+        ${conjHtml}
         ${item.preco>0?`<div class="item-preco">${fmtBRL(item.preco)}</div>`:''}
       </div>
     </div>`;

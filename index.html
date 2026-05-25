@@ -1389,6 +1389,15 @@ function selectProd(itemId, prodId) {
   item.desc = prod.nome + (prod.dim ? '\nDimensões: '+prod.dim : '') + (prod.obs ? '\n'+prod.obs : '');
   item.preco = prod.preco;
   item.foto = prod.foto || '';
+  // Embutir componentes do conjunto direto no item
+  if (prod.tipoProd === 'conjunto' && prod.componentes && prod.componentes.length) {
+    item.conjComponents = prod.componentes.map(c => {
+      const cp = produtos.find(x => x.id === c.prodId);
+      return cp ? { nome: cp.nome } : null;
+    }).filter(Boolean);
+  } else {
+    item.conjComponents = [];
+  }
   const inp = document.getElementById('search-'+itemId); if(inp) inp.value = prod.nome;
   const descEl = document.getElementById('desc-'+itemId); if(descEl) descEl.value = item.desc;
   const precoEl = document.getElementById('preco-'+itemId); if(precoEl) precoEl.value = item.preco;
@@ -2194,6 +2203,14 @@ function selectProdPd(idx, prodId) {
   item.prodId=prodId; item.searchText=prod.nome;
   item.desc=prod.nome+(prod.dim?'\nDimensões: '+prod.dim:'')+(prod.obs?'\n'+prod.obs:'');
   item.preco=prod.preco; item.foto=prod.foto||'';
+  if (prod.tipoProd === 'conjunto' && prod.componentes && prod.componentes.length) {
+    item.conjComponents = prod.componentes.map(c => {
+      const cp = produtos.find(x => x.id === c.prodId);
+      return cp ? { nome: cp.nome } : null;
+    }).filter(Boolean);
+  } else {
+    item.conjComponents = [];
+  }
   renderItemsPedido();
   updatePreviewPd();
 }
