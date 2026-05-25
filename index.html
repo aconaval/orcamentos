@@ -1608,7 +1608,7 @@ function getHTMLOrc(o) {
 
   const kitRow = ``;
 
-  const obsHtml = o.obs ? `<div class="obs-box"><strong>Observação:</strong> ${o.obs}</div>` : '';
+  const obsHtml = o.obs ? `<div class="obs-box"><strong>Observação:</strong> <strong>${o.obs}</strong></div>` : '';
   const prazoDate2 = o.data ? new Date(o.data + 'T12:00:00') : new Date();
   prazoDate2.setDate(prazoDate2.getDate() + 30);
   const prazoStr2 = prazoDate2.toLocaleDateString('pt-BR');
@@ -1702,7 +1702,7 @@ function getHTMLOrc(o) {
   .desconto-line strong { color:#1a7a44 }
 
   /* OBS */
-  .obs-box { background:#f9f9f9; border:1px solid #ddd; border-radius:3px; padding:7px 10px; font-size:12pt; color:#444; margin-bottom:10px }
+  .obs-box { background:#FFF176; border:2px solid #F9A825; border-radius:3px; padding:7px 10px; font-size:12pt; color:#111; margin-bottom:10px; font-weight:700 }
 
   /* PAYMENT */
   .pay-label { font-size:12pt; text-transform:uppercase; letter-spacing:.5px; font-weight:700; color:#555; margin-bottom:6px }
@@ -2622,7 +2622,7 @@ function getHTMLPed(p) {
       <td class="val" style="vertical-align:top;padding-top:10px">${item.preco>0?fmtBRL(item.preco):'—'}</td>
     </tr>`;
   }).join('');
-  const obsHtml=p.obs?`<div class="obs-box"><strong>Observação:</strong> ${p.obs}</div>`:'';
+  const obsHtml=p.obs?`<div class="obs-box"><strong>Observação:</strong> <strong>${p.obs}</strong></div>`:'';
   const pdfTitle = 'PEDIDO ' + String(p.num).padStart(3,'0') + ([p.cidade,p.estado].filter(Boolean).length ? ' - ' + [p.cidade.toUpperCase(),p.estado].filter(Boolean).join(' - ') : '');
 
   // Fotos do projeto (buscadas do catálogo via prodId)
@@ -2684,7 +2684,7 @@ function getHTMLPed(p) {
   td.idx{width:36px;text-align:center;font-weight:700;color:#003366}
   td.val{text-align:right;white-space:nowrap;font-weight:700}
   .total-tr td{background:#eef3fa;border-top:2px solid #003366;font-weight:700;font-size:12pt;padding:10px;color:#111}
-  .obs-box{background:#f9f9f9;border:1px solid #ddd;border-radius:3px;padding:7px 10px;font-size:12pt;color:#111;margin-bottom:10px}
+  .obs-box{background:#FFF176;border:2px solid #F9A825;border-radius:3px;padding:7px 10px;font-size:12pt;color:#111;margin-bottom:10px;font-weight:700}
   .prazo-box{background:#eef3fa;border:1px solid #b5d4f4;border-radius:3px;padding:8px 12px;font-size:12pt;color:#003366;font-weight:700;margin-bottom:10px}
   .pay-label{font-size:12pt;text-transform:uppercase;font-weight:700;color:#111;margin-bottom:6px}
   .pay-grid{display:table;width:100%;border:1px solid #ccc;border-radius:3px;overflow:hidden}
