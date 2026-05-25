@@ -80,6 +80,45 @@ body{background:#f5f7fa;color:#222;min-height:100vh}
 .cat-chip{padding:4px 12px;border-radius:999px;border:1px solid #d0d4d8;background:#fff;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;color:#555}
 .cat-chip:hover{border-color:#185FA5;color:#185FA5}
 .cat-chip.active{background:#185FA5;color:#fff;border-color:#185FA5}
+/* ── SUBFILTERS ── */
+.subfilters-wrap{margin-bottom:10px}
+.subfilter-row{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-bottom:5px}
+.subfilter-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;min-width:80px;flex-shrink:0}
+.sub-chip{padding:3px 11px;border-radius:999px;border:1px solid #d0d4d8;background:#fff;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;color:#555}
+.sub-chip:hover{filter:brightness(.93)}
+.filtros-panel{margin-bottom:12px}
+.filtro-def-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f5f7fa;border-radius:6px;margin-bottom:5px}
+.filtro-def-name{flex:1;font-size:13px;font-weight:500;color:#003366}
+.filtro-add-row{display:flex;gap:6px;margin-top:6px}
+.filtro-add-row input{flex:1}
+/* ── CONJUNTOS ── */
+.tipo-toggle{display:flex;gap:4px;background:#f0f4f8;padding:3px;border-radius:8px;margin-bottom:14px;width:fit-content}
+.tipo-btn{padding:5px 16px;border-radius:6px;font-size:12px;font-weight:500;border:none;cursor:pointer;transition:all .15s;color:#666;background:none}
+.tipo-btn.active{background:#fff;color:#003366;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.conj-picker{border:1px solid #B5D4F4;border-radius:8px;background:#f0f6ff;padding:12px;margin-bottom:10px}
+.conj-search-wrap{position:relative;margin-bottom:8px}
+.conj-search-wrap input{width:100%;font-size:13px;padding:7px 10px;border:1px solid #B5D4F4;border-radius:6px;background:#fff}
+.conj-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #185FA5;border-top:none;border-radius:0 0 8px 8px;z-index:300;max-height:220px;overflow-y:auto;box-shadow:0 6px 18px rgba(0,0,0,.12);display:none}
+.conj-dropdown.open{display:block}
+.conj-opt{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f2f5;transition:background .1s}
+.conj-opt:last-child{border-bottom:none}
+.conj-opt:hover{background:#EEF5FF}
+.conj-opt-img{width:32px;height:32px;object-fit:cover;border-radius:4px;flex-shrink:0;background:#eee}
+.conj-opt-info{flex:1;min-width:0}
+.conj-opt-nome{font-weight:600;color:#003366;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conj-opt-sub{font-size:11px;color:#888}
+.conj-opt-preco{font-size:13px;font-weight:600;color:#185FA5;white-space:nowrap}
+.comp-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#fff;border:1px solid #B5D4F4;border-radius:6px;margin-bottom:5px}
+.comp-row-img{width:34px;height:34px;object-fit:cover;border-radius:4px;flex-shrink:0;background:#eee;display:flex;align-items:center;justify-content:center;font-size:16px}
+.comp-row-info{flex:1;min-width:0}
+.comp-row-nome{font-size:13px;font-weight:500;color:#003366;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comp-row-sub{font-size:11px;color:#888}
+.comp-row-preco{font-size:13px;font-weight:600;color:#185FA5;white-space:nowrap}
+.conj-total{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#EAF3DE;border-radius:6px;margin-top:6px}
+.badge-conj{background:#E6F1FB;color:#185FA5;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;border:1px solid #B5D4F4;cursor:pointer;white-space:nowrap}
+.badge-conj:hover{background:#B5D4F4}
+.conj-info-box{background:#f0f6ff;border:1px solid #B5D4F4;border-radius:6px;padding:8px 10px;margin-top:4px}
+.conj-info-item{font-size:12px;color:#185FA5;padding:2px 0;font-weight:500}
 /* ── DRAG HANDLE ── */
 .drag-handle{cursor:grab;color:#bbb;font-size:16px;padding:0 6px;user-select:none;line-height:1}
 .drag-handle:active{cursor:grabbing}
@@ -167,116 +206,44 @@ tbody tr:hover{background:#fafbfc}
 .ov-conditions-title{font-weight:700;font-size:.78rem;margin-bottom:4px;text-transform:uppercase}
 
 @media(max-width:700px){
-  /* ── TOPBAR ── */
-  .topbar{padding:0 10px;height:auto;min-height:52px;flex-wrap:wrap;gap:0}
-  .logo{font-size:14px}
+  /* Topbar mobile */
+  .topbar{padding:0 10px;height:auto;min-height:56px;flex-wrap:wrap;gap:4px}
+  .logo{font-size:15px}
   .logo span{font-size:10px}
-  .fb-status{font-size:10px;padding:2px 7px;order:3}
-
-  /* ── NAV ── */
-  .nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-wrap:nowrap;width:100%;border-top:1px solid #e0e4e8}
+  .fb-status{font-size:10px;padding:2px 7px}
+  /* Nav scroll horizontal */
+  .nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-nowrap:nowrap;width:100%;border-top:1px solid #e0e4e8}
   .nav::-webkit-scrollbar{display:none}
-  .nav-tab{font-size:11px;padding:0 10px;white-space:nowrap;height:42px;flex-shrink:0;min-width:auto}
-
-  /* ── PAGES ── */
+  .nav-tab{font-size:11px;padding:0 10px;white-space:nowrap;height:44px;flex-shrink:0}
+  /* Pages */
   .page{padding:10px}
   .sec-header{flex-direction:column;align-items:flex-start;gap:8px}
-  .sec-title{font-size:15px}
-
-  /* ── GRIDS ── */
+  /* Grids collapse */
   .grid2,.grid3{grid-template-columns:1fr}
-
-  /* Grids inline (style attr) — clientes 2fr 1fr 1fr e similares */
-  div[style*="grid-template-columns:2fr 1fr 1fr"],
-  div[style*="grid-template-columns:2fr 1fr"]{
-    display:flex!important;flex-direction:column!important;gap:8px!important
-  }
-
-  /* Layout principal Orçamento e Pedido */
+  /* Items row */
+  .item-row{grid-template-columns:1fr}
+  /* Cards */
+  .card{padding:12px}
+  /* Stats */
+  .grid3.stat-grid{grid-template-columns:repeat(3,1fr)}
+  /* Quote cards */
+  .quote-card{flex-wrap:wrap;gap:8px;padding:10px}
+  .quote-card>div:first-child{flex:1;min-width:0}
+  /* Modals full screen on mobile */
+  .modal-overlay{align-items:flex-end;padding:0}
+  .modal{max-width:100%!important;width:100%;border-radius:16px 16px 0 0;max-height:92vh;margin:0}
+  .modal-body{max-height:60vh}
+  .modal-footer{flex-wrap:wrap;gap:8px}
+  .modal-footer .btn{flex:1;justify-content:center;text-align:center;min-width:120px}
+  /* Forms */
+  .form-input{font-size:16px!important} /* prevents zoom on iOS */
+  /* ov-payment */
+  .ov-payment{grid-template-columns:1fr}
+  /* Novo Pedido / Orçamento layout */
   #page-novo>div[style*="grid-template-columns:1fr 320px"],
   #page-novo-pedido>div[style*="grid-template-columns:1fr 320px"]{
     display:flex!important;flex-direction:column!important
   }
-
-  /* ── ITEM ROW ── */
-  .item-row{grid-template-columns:1fr;gap:6px}
-  .item-row>*:last-child{display:flex;justify-content:flex-end}
-
-  /* ── CARDS ── */
-  .card{padding:12px}
-
-  /* ── STAT CARDS ── */
-  .grid3{grid-template-columns:repeat(3,1fr)}
-  .stat-card{padding:10px 12px}
-  .stat-value{font-size:17px}
-  .stat-label{font-size:10px}
-
-  /* ── PRODUCTS TABLE ── */
-  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  table{min-width:520px}
-
-  /* Busca e filtros — empilhar */
-  #page-produtos>div[style*="justify-content:space-between"]{
-    flex-direction:column!important;align-items:stretch!important;gap:8px!important
-  }
-  #prod-search{width:100%!important;font-size:16px!important}
-  .cat-filters{flex-wrap:wrap}
-
-  /* ── QUOTE / PEDIDO CARDS ── */
-  .quote-card{flex-wrap:wrap;gap:6px;padding:10px}
-  .quote-card>div:first-child{flex:1;min-width:0}
-  .quote-card>.td-actions,
-  .quote-card>div:last-child{width:100%;justify-content:flex-start;flex-wrap:wrap}
-
-  /* ── BOTÕES ── */
-  .btn{min-height:40px;display:inline-flex;align-items:center;justify-content:center}
-  .btn-sm{min-height:34px}
-
-  /* ── MODAL ── */
-  .modal-overlay{align-items:flex-end;padding:0}
-  .modal{max-width:100%!important;width:100%;border-radius:16px 16px 0 0;max-height:92vh;margin:0}
-  .modal-body{max-height:58vh;overflow-y:auto}
-  .modal-footer{flex-wrap:wrap;gap:8px;padding:10px 14px}
-  .modal-footer .btn{flex:1;justify-content:center;text-align:center;min-width:100px}
-
-  /* ── FORMS ── */
-  .form-input,.form-select,.form-textarea{font-size:16px!important;min-height:44px} /* evita zoom no iOS */
-  .form-textarea{min-height:80px}
-  .form-label{font-size:13px}
-
-  /* ── AUTOCOMPLETE ── */
-  .ac-item{padding:13px 14px}
-
-  /* ── OV-PAYMENT ── */
-  .ov-payment{grid-template-columns:1fr}
-
-  /* ── SLIDE PANEL ── */
-  .slide-panel.open{max-height:2000px} /* mais espaço p/ forms longos */
-
-  /* ── DRAG HANDLE ── */
-  .drag-handle{font-size:20px;padding:0 8px} /* área de toque maior */
-
-  /* ── TOTAL ROW ── */
-  .total-value{font-size:17px}
-  .total-row{flex-wrap:wrap;gap:4px}
-
-  /* ── TOPBAR STATUS ── */
-  #fb-status{width:100%;text-align:center;padding:2px 0;font-size:10px;border-top:1px solid #f0f0f0}
-
-  /* ── SEC-HEADER botão ── */
-  .sec-header>.btn{align-self:flex-start}
-}
-
-@media(max-width:420px){
-  .grid3{grid-template-columns:1fr!important}
-  .stat-value{font-size:18px}
-  .nav-tab{font-size:10px;padding:0 8px}
-  .quote-num{font-size:13px;min-width:36px}
-  .badge{padding:1px 4px;font-size:9px}
-  .btn{font-size:12px}
-  .sec-title{font-size:14px}
-  .page{padding:8px}
-  .card{padding:10px}
 }
 </style>
 </head>
@@ -302,7 +269,21 @@ tbody tr:hover{background:#fafbfc}
 <div class="page active" id="page-produtos">
   <div class="sec-header">
     <div class="sec-title">Cadastro de Produtos <small>Gerencie os produtos e valores do catálogo</small></div>
-    <button class="btn btn-primary" onclick="toggleProdForm()">＋ Novo Produto</button>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="toggleFiltrosPanel()">⚙️ Personalizar filtros</button>
+      <button class="btn btn-primary" onclick="toggleProdForm()">＋ Novo Produto</button>
+    </div>
+  </div>
+
+  <!-- PAINEL GERENCIAR FILTROS -->
+  <div class="card slide-panel filtros-panel" id="filtros-panel">
+    <div style="font-size:13px;font-weight:700;color:#003366;margin-bottom:10px">Filtros personalizados</div>
+    <div style="font-size:12px;color:#888;margin-bottom:10px">Crie os filtros que quiser (ex: Largura, Material, Potência). Aparecem no formulário e na listagem de produtos.</div>
+    <div id="filtros-def-list"></div>
+    <div class="filtro-add-row">
+      <input class="form-input" id="inp-novo-filtro" placeholder="Nome do novo filtro (ex: Material)" style="font-size:13px" onkeydown="if(event.key==='Enter')addFiltroDef()"/>
+      <button class="btn btn-primary btn-sm" onclick="addFiltroDef()">＋ Adicionar</button>
+    </div>
   </div>
 
   <div class="grid3">
@@ -313,16 +294,37 @@ tbody tr:hover{background:#fafbfc}
 
   <div class="card slide-panel" id="prod-form-panel">
     <div style="padding-top:4px">
-      <div style="font-size:14px;font-weight:700;color:#003366;margin-bottom:14px" id="prod-form-title">Novo Produto</div>
+      <div style="font-size:14px;font-weight:700;color:#003366;margin-bottom:10px" id="prod-form-title">Novo Produto</div>
+      <div class="tipo-toggle">
+        <button class="tipo-btn active" id="tipo-btn-simples" onclick="setTipoProduto('simples')">Produto simples</button>
+        <button class="tipo-btn" id="tipo-btn-conjunto" onclick="setTipoProduto('conjunto')">📦 Conjunto</button>
+      </div>
       <div class="grid2">
-        <div class="form-group"><label class="form-label">Nome do Produto</label><input class="form-input" id="inp-nome" placeholder="Ex: Fogão a Lenha Industrial"/></div>
+        <div class="form-group"><label class="form-label">Nome</label><input class="form-input" id="inp-nome" placeholder="Ex: Fogão a Lenha Industrial"/></div>
         <div class="form-group"><label class="form-label">Dimensões / Especificações</label><input class="form-input" id="inp-dim" placeholder="Ex: 70x50cm — inox 430"/></div>
       </div>
       <div class="grid2">
-        <div class="form-group"><label class="form-label">Valor Unitário (R$)</label><input class="form-input" id="inp-preco" type="number" min="0" step="0.01" placeholder="0,00"/></div>
+        <div class="form-group" id="wrap-preco"><label class="form-label">Valor Unitário (R$)</label><input class="form-input" id="inp-preco" type="number" min="0" step="0.01" placeholder="0,00"/></div>
         <div class="form-group"><label class="form-label">Categoria</label><input class="form-input" id="inp-cat" placeholder="Ex: Fogão, Chaminé, Acessórios..."/></div>
       </div>
+      <!-- PAINEL CONJUNTO -->
+      <div id="conj-picker-wrap" style="display:none">
+        <div class="conj-picker">
+          <div style="font-size:12px;font-weight:600;color:#185FA5;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Componentes do conjunto</div>
+          <div class="conj-search-wrap">
+            <input id="conj-search-inp" placeholder="🔍 Buscar produto para adicionar..." autocomplete="off"
+              oninput="renderConjDropdown(this.value)" onfocus="renderConjDropdown(this.value)" onblur="setTimeout(()=>closeConjDropdown(),180)"/>
+            <div class="conj-dropdown" id="conj-dropdown"></div>
+          </div>
+          <div id="comp-list"></div>
+          <div class="conj-total" id="conj-total" style="display:none">
+            <span style="font-size:12px;color:#3B6D11;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Total calculado</span>
+            <span style="font-size:18px;font-weight:700;color:#3B6D11" id="conj-total-val">R$ 0,00</span>
+          </div>
+        </div>
+      </div>
       <div class="form-group"><label class="form-label">Observação (opcional)</label><input class="form-input" id="inp-obs" placeholder="Detalhes adicionais exibidos no orçamento"/></div>
+      <div id="filtros-extras-form"></div>
       <div class="form-group">
         <label class="form-label">Foto do Produto</label>
         <div class="photo-upload-area" id="photo-drop" onclick="document.getElementById('inp-foto').click()">
@@ -359,7 +361,7 @@ tbody tr:hover{background:#fafbfc}
     </div>
   </div>
 
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:6px">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <div class="cat-filters" id="cat-filters" style="margin-bottom:0"></div>
     </div>
@@ -367,6 +369,7 @@ tbody tr:hover{background:#fafbfc}
       <input class="form-input" id="prod-search" placeholder="🔍 Buscar produto..." style="width:200px;font-size:13px" oninput="renderProdutos()"/>
     </div>
   </div>
+  <div class="subfilters-wrap" id="subfilters-wrap" style="display:none"></div>
   <div class="table-wrap">
     <table>
       <thead><tr><th style="width:28px"></th><th>#</th><th>Foto</th><th>Nome / Dimensões</th><th>Categoria</th><th style="text-align:right">Valor</th><th style="text-align:right">Ações</th></tr></thead>
@@ -408,7 +411,16 @@ tbody tr:hover{background:#fafbfc}
         <div style="font-size:13px;font-weight:700;color:#003366;margin-bottom:12px">Resumo Financeiro</div>
         <div style="display:flex;flex-direction:column;gap:7px">
           <div style="display:flex;justify-content:space-between;font-size:13px;color:#666"><span>Subtotal</span><span class="price-tag" id="sum-subtotal">R$ 0,00</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#3B6D11">Desconto à vista (10%)</span><span style="font-weight:600;color:#3B6D11" id="sum-desconto">− R$ 0,00</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;gap:8px">
+            <label style="color:#3B6D11;font-size:13px;white-space:nowrap">Desconto</label>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input id="inp-desc-pct" type="number" min="0" max="100" step="0.5" placeholder="%" oninput="updatePreview()" style="width:58px;font-size:13px;padding:3px 6px;border:1px solid #C0DD97;border-radius:5px;text-align:right;background:#f8fdf3"/>
+              <span style="color:#aaa;font-size:12px">%</span>
+              <span style="color:#aaa;font-size:12px;margin:0 2px">ou</span>
+              <input id="inp-desc-val" type="number" min="0" step="0.01" placeholder="R$" oninput="updatePreview()" style="width:84px;font-size:13px;padding:3px 6px;border:1px solid #C0DD97;border-radius:5px;text-align:right;background:#f8fdf3"/>
+              <span style="color:#3B6D11;font-weight:600;min-width:70px;text-align:right" id="sum-desconto">− R$ 0,00</span>
+            </div>
+          </div>
           <div style="border-top:1px solid #e0e4e8;margin:2px 0"></div>
           <div class="total-row">
             <div>
@@ -559,7 +571,16 @@ tbody tr:hover{background:#fafbfc}
         <div style="font-size:13px;font-weight:700;color:#003366;margin-bottom:12px">Resumo Financeiro</div>
         <div style="display:flex;flex-direction:column;gap:7px">
           <div style="display:flex;justify-content:space-between;font-size:13px;color:#666"><span>Subtotal</span><span class="price-tag" id="pd-sum-subtotal">R$ 0,00</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#3B6D11">Desconto à vista (10%)</span><span style="font-weight:600;color:#3B6D11" id="pd-sum-desconto">− R$ 0,00</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;gap:8px">
+            <label style="color:#3B6D11;font-size:13px;white-space:nowrap">Desconto</label>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input id="pd-inp-desc-pct" type="number" min="0" max="100" step="0.5" placeholder="%" oninput="updatePreviewPd()" style="width:58px;font-size:13px;padding:3px 6px;border:1px solid #C0DD97;border-radius:5px;text-align:right;background:#f8fdf3"/>
+              <span style="color:#aaa;font-size:12px">%</span>
+              <span style="color:#aaa;font-size:12px;margin:0 2px">ou</span>
+              <input id="pd-inp-desc-val" type="number" min="0" step="0.01" placeholder="R$" oninput="updatePreviewPd()" style="width:84px;font-size:13px;padding:3px 6px;border:1px solid #C0DD97;border-radius:5px;text-align:right;background:#f8fdf3"/>
+              <span style="color:#3B6D11;font-weight:600;min-width:70px;text-align:right" id="pd-sum-desconto">− R$ 0,00</span>
+            </div>
+          </div>
           <div style="border-top:1px solid #e0e4e8;margin:2px 0"></div>
           <div class="total-row">
             <div>
@@ -688,6 +709,19 @@ let produtos = [];
 let orcamentos = [];
 let items = [];
 let currentOrcamento = null;
+let filtrosDef = [];      // ex: ["Largura","Material","Tipo"]
+let filtrosAtivos = {};   // ex: {"Largura":"70cm"}
+
+// Paleta de cores para os filtros (cicla pelo índice)
+const FILTRO_CORES = [
+  {bg:'#E6F1FB',border:'#B5D4F4',text:'#185FA5',active:'#185FA5'},
+  {bg:'#EAF3DE',border:'#C0DD97',text:'#3B6D11',active:'#1e7a47'},
+  {bg:'#EEEDFE',border:'#CECBF6',text:'#534AB7',active:'#534AB7'},
+  {bg:'#FAEEDA',border:'#FAC775',text:'#854F0B',active:'#ba7517'},
+  {bg:'#E1F5EE',border:'#9FE1CB',text:'#0F6E56',active:'#0F6E56'},
+  {bg:'#FAECE7',border:'#F5C4B3',text:'#993C1D',active:'#D85A30'},
+];
+function corFiltro(idx){ return FILTRO_CORES[idx % FILTRO_CORES.length]; }
 
 // ── INDICADOR DE STATUS ──────────────────────────────────────────
 function setStatus(msg, tipo) {
@@ -759,7 +793,8 @@ async function save() {
     });
     await Promise.all([
       colOrc.doc('orcamentos').set({ lista: orcSemFoto }),
-      colOrc.doc('produtos_index').set({ ids: produtos.map(p => p.id) })
+      colOrc.doc('produtos_index').set({ ids: produtos.map(p => p.id) }),
+      colOrc.doc('config').set({ filtrosDef })
     ]);
 
     // Cada produto em seu próprio documento
@@ -780,10 +815,11 @@ async function save() {
 async function loadFromFirebase() {
   setStatus('⏳ Carregando…');
   try {
-    const [idxSnap, orcSnap, pedSnap] = await Promise.all([
+    const [idxSnap, orcSnap, pedSnap, cfgSnap] = await Promise.all([
       db.collection('acn').doc('produtos_index').get(),
       db.collection('acn').doc('orcamentos').get(),
-      db.collection('acn').doc('pedidos').get()
+      db.collection('acn').doc('pedidos').get(),
+      db.collection('acn').doc('config').get()
     ]);
 
     if (idxSnap.exists) {
@@ -799,6 +835,7 @@ async function loadFromFirebase() {
 
     if (orcSnap.exists) orcamentos = orcSnap.data().lista || [];
     if (pedSnap.exists) pedidos = pedSnap.data().lista || [];
+    if (cfgSnap.exists) filtrosDef = cfgSnap.data().filtrosDef || [];
 
     setStatus('☁️ Online', 'ok');
     return true;
@@ -812,6 +849,7 @@ async function loadFromFirebase() {
     }
     produtos   = JSON.parse(localStorage.getItem('acn_produtos') || '[]');
     orcamentos = JSON.parse(localStorage.getItem('acn_orcamentos') || '[]');
+    filtrosDef = JSON.parse(localStorage.getItem('acn_filtros_def') || '[]');
     return false;
   }
 }
@@ -831,11 +869,14 @@ function showPage(name) {
 
 function toggleProdForm(open) {
   const p = document.getElementById('prod-form-panel');
-  p.classList.toggle('open', open !== undefined ? open : !p.classList.contains('open'));
+  const wasOpen = p.classList.contains('open');
+  p.classList.toggle('open', open !== undefined ? open : !wasOpen);
+  if(!wasOpen || open===true) renderFiltrosExtrasForm();
 }
 function cancelProdForm() { toggleProdForm(false); clearProdForm(); }
 function clearProdForm() {
   ['inp-nome','inp-dim','inp-preco','inp-cat','inp-obs'].forEach(id => document.getElementById(id).value = '');
+  filtrosDef.forEach(f => { const el=document.getElementById('inp-f-'+slugify(f)); if(el) el.value=''; });
   document.getElementById('edit-prod-id').value = '';
   document.getElementById('prod-form-title').textContent = 'Novo Produto';
   currentFotoBase64 = null;
@@ -909,18 +950,26 @@ function saveProduto() {
   const preco = parseFloat(document.getElementById('inp-preco').value);
   const cat  = document.getElementById('inp-cat').value.trim();
   const obs  = document.getElementById('inp-obs').value.trim();
+  const filtros = {};
+  filtrosDef.forEach(f => { const el=document.getElementById('inp-f-'+slugify(f)); if(el) filtros[f]=el.value.trim(); });
+  const tipoProd = document.getElementById('tipo-btn-conjunto').classList.contains('active') ? 'conjunto' : 'simples';
+  const componentes = tipoProd==='conjunto' ? [...currentComponentes] : [];
+  const precoFinal = tipoProd==='conjunto'
+    ? componentes.reduce((s,c)=>{ const p=produtos.find(x=>x.id===c.prodId); return s+(p?p.preco:0); },0)
+    : preco;
   if (!nome) return alert('Informe o nome do produto.');
-  if (isNaN(preco) || preco < 0) return alert('Informe um valor válido.');
+  if (tipoProd==='simples' && (isNaN(preco) || preco < 0)) return alert('Informe um valor válido.');
+  if (tipoProd==='conjunto' && componentes.length===0) return alert('Adicione ao menos um componente ao conjunto.');
   const eid = document.getElementById('edit-prod-id').value;
   if (eid) {
     const idx = produtos.findIndex(p => p.id == eid);
     if (idx >= 0) {
-      produtos[idx] = { ...produtos[idx], nome, dim, preco, cat, obs };
+      produtos[idx] = { ...produtos[idx], nome, dim, preco:precoFinal, cat, obs, filtros, tipoProd, componentes };
       if (currentFotoBase64 !== null) produtos[idx].foto = currentFotoBase64;
       produtos[idx].fotosprojeto = [...currentFotosProjetoBase64];
     }
   } else {
-    produtos.push({ id: Date.now(), nome, dim, preco, cat, obs, foto: currentFotoBase64 || '', fotosprojeto: [...currentFotosProjetoBase64] });
+    produtos.push({ id: Date.now(), nome, dim, preco:precoFinal, cat, obs, filtros, tipoProd, componentes, foto: currentFotoBase64 || '', fotosprojeto: [...currentFotosProjetoBase64] });
   }
   save(); renderProdutos(); cancelProdForm();
 }
@@ -931,6 +980,10 @@ function editProduto(id) {
   document.getElementById('inp-preco').value = p.preco;
   document.getElementById('inp-cat').value  = p.cat || '';
   document.getElementById('inp-obs').value  = p.obs || '';
+  renderFiltrosExtrasForm();
+  filtrosDef.forEach(f => { const el=document.getElementById('inp-f-'+slugify(f)); if(el) el.value=(p.filtros&&p.filtros[f])||''; });
+  currentComponentes = p.componentes ? [...p.componentes] : [];
+  setTipoProduto(p.tipoProd||'simples');
   document.getElementById('edit-prod-id').value = p.id;
   document.getElementById('prod-form-title').textContent = 'Editar Produto';
   currentFotoBase64 = null; // preserve existing unless changed
@@ -947,38 +1000,159 @@ function deleteProduto(id) {
   });
 }
 let filtroCategoria = '';
-function setFiltroCategoria(cat) { filtroCategoria = cat; renderProdutos(); }
+function setFiltroCategoria(cat) { filtroCategoria = cat; filtrosAtivos={}; renderProdutos(); }
+function setFiltroAtivo(nome, val) { filtrosAtivos[nome] = val; renderProdutos(); }
+
+// Utilitário: slug para IDs de input
+function slugify(s){ return s.toLowerCase().replace(/[^a-z0-9]/g,'-'); }
+
+// ── Painel de gestão de filtros ─────────────────────────────
+function toggleFiltrosPanel(){
+  const p=document.getElementById('filtros-panel');
+  p.classList.toggle('open');
+  renderFiltrosDefPanel();
+}
+function renderFiltrosDefPanel(){
+  const wrap=document.getElementById('filtros-def-list');
+  if(!wrap) return;
+  if(!filtrosDef.length){ wrap.innerHTML='<div style="font-size:12px;color:#aaa;margin-bottom:6px">Nenhum filtro criado ainda.</div>'; return; }
+  wrap.innerHTML = filtrosDef.map((f,i)=>{
+    const c=corFiltro(i);
+    return `<div class="filtro-def-item">
+      <span style="width:14px;height:14px;border-radius:3px;background:${c.bg};border:1px solid ${c.border};display:inline-block;flex-shrink:0"></span>
+      <span class="filtro-def-name">${f}</span>
+      <button class="btn btn-danger btn-sm" style="padding:2px 8px;font-size:11px" onclick="removeFiltroDef(${i})">✕ Remover</button>
+    </div>`;
+  }).join('');
+}
+function addFiltroDef(){
+  const inp=document.getElementById('inp-novo-filtro');
+  const nome=inp.value.trim();
+  if(!nome) return;
+  if(filtrosDef.includes(nome)) return alert('Já existe um filtro com esse nome.');
+  filtrosDef.push(nome);
+  inp.value='';
+  renderFiltrosDefPanel();
+  renderFiltrosExtrasForm();
+  saveConfig();
+  renderProdutos();
+}
+function removeFiltroDef(idx){
+  const nome = filtrosDef[idx];
+  showConfirm('Remover filtro "'+nome+'"','O filtro será removido da listagem. Os valores já salvos nos produtos continuarão armazenados.', ()=>{
+    filtrosDef.splice(idx,1);
+    delete filtrosAtivos[nome];
+    renderFiltrosDefPanel();
+    renderFiltrosExtrasForm();
+    saveConfig();
+    renderProdutos();
+  });
+}
+async function saveConfig(){
+  try {
+    await db.collection('acn').doc('config').set({ filtrosDef });
+    localStorage.setItem('acn_filtros_def', JSON.stringify(filtrosDef));
+  } catch(e){ console.error('saveConfig error',e); }
+}
+
+// ── Campos dinâmicos no formulário de produto ────────────────
+function renderFiltrosExtrasForm(){
+  const wrap=document.getElementById('filtros-extras-form');
+  if(!wrap) return;
+  if(!filtrosDef.length){ wrap.innerHTML=''; return; }
+  wrap.innerHTML = `<div style="border-top:1px solid #f0f2f5;margin:10px 0 10px;padding-top:10px">
+    <div style="font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Filtros personalizados</div>
+    <div class="grid2">` +
+    filtrosDef.map((f,i)=>{
+      const vals=[...new Set(produtos.map(p=>p.filtros&&p.filtros[f]).filter(Boolean))];
+      const dl='dl-f-'+slugify(f);
+      return `<div class="form-group" style="margin-bottom:0">
+        <label class="form-label">${f}</label>
+        <input class="form-input" id="inp-f-${slugify(f)}" placeholder="${f}..." list="${dl}"/>
+        <datalist id="${dl}">${vals.map(v=>`<option value="${v}">`).join('')}</datalist>
+      </div>`;
+    }).join('') +
+    `</div></div>`;
+}
 
 function renderProdutos() {
+  /* ── Chips de categoria ── */
   const cats = [...new Set(produtos.map(p=>p.cat).filter(Boolean))];
   const cf = document.getElementById('cat-filters');
   cf.innerHTML = `<button class="cat-chip${!filtroCategoria?' active':''}" onclick="setFiltroCategoria('')">Todos</button>`
-    + cats.map(c=>`<button class="cat-chip${filtroCategoria===c?' active':''}" onclick="setFiltroCategoria('${c}')">${c}</button>`).join('');
+    + cats.map(c=>`<button class="cat-chip${filtroCategoria===c?' active':''}" onclick="setFiltroCategoria('${c.replace(/'/g,"\\'")}')">${c}</button>`).join('');
 
+  /* ── Lista filtrada por categoria ── */
   const busca = (document.getElementById('prod-search')?.value||'').toLowerCase();
-  let lista = produtos;
-  if (filtroCategoria) lista = lista.filter(p => p.cat === filtroCategoria);
-  if (busca) lista = lista.filter(p =>
-    p.nome.toLowerCase().includes(busca) ||
-    (p.cat||'').toLowerCase().includes(busca) ||
-    (p.dim||'').toLowerCase().includes(busca)
-  );
+  let lista = filtroCategoria ? produtos.filter(p => p.cat === filtroCategoria) : [...produtos];
 
+  /* ── Subfilters dinâmicos ── */
+  const sw = document.getElementById('subfilters-wrap');
+  if(filtrosDef.length){
+    sw.style.display='';
+    sw.innerHTML = filtrosDef.map((f,i)=>{
+      const vals=[...new Set(lista.map(p=>p.filtros&&p.filtros[f]).filter(Boolean))];
+      if(!vals.length) return '';
+      const c=corFiltro(i);
+      const ativo=filtrosAtivos[f]||'';
+      return `<div class="subfilter-row">
+        <span class="subfilter-label" style="color:${c.text}">${f}</span>
+        <button class="sub-chip" style="${!ativo?'background:'+c.bg+';border-color:'+c.border+';color:'+c.text:''}" onclick="setFiltroAtivo('${f.replace(/'/g,"\\'")}','')">Todos</button>
+        ${vals.map(v=>`<button class="sub-chip" style="${ativo===v?'background:'+c.active+';color:#fff;border-color:'+c.active:''}" onclick="setFiltroAtivo('${f.replace(/'/g,"\\'")}','${v.replace(/'/g,"\\'")}')">
+          ${v}</button>`).join('')}
+      </div>`;
+    }).join('');
+  } else {
+    sw.style.display='none';
+  }
+
+  /* ── Aplica filtros ativos ── */
+  Object.entries(filtrosAtivos).forEach(([f,v])=>{
+    if(v) lista = lista.filter(p => p.filtros && p.filtros[f]===v);
+  });
+  if (busca) lista = lista.filter(p => {
+    const fvals = Object.values(p.filtros||{}).join(' ').toLowerCase();
+    return p.nome.toLowerCase().includes(busca)||
+      (p.cat||'').toLowerCase().includes(busca)||
+      (p.dim||'').toLowerCase().includes(busca)||
+      fvals.includes(busca);
+  });
+
+  /* ── Tabela ── */
   const tbody = document.getElementById('tbl-produtos');
   if (!lista.length) {
     tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">📦</div><p>Nenhum produto encontrado.</p></div></td></tr>';
   } else {
     tbody.innerHTML = lista.map((p) => {
       const realIdx = produtos.findIndex(x=>x.id===p.id);
+      const filtroBadges = filtrosDef.map((f,i)=>{
+        const v=p.filtros&&p.filtros[f]; if(!v) return '';
+        const c=corFiltro(i);
+        return `<span style="background:${c.bg};color:${c.text};border:1px solid ${c.border};font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600">${f}: ${v}</span>`;
+      }).join('');
+      // Conjuntos que contêm este produto
+      const conjsDoP = produtos.filter(x=>x.tipoProd==='conjunto'&&x.componentes&&x.componentes.some(c=>c.prodId===p.id));
+      // Componentes se for conjunto
+      const isConj = p.tipoProd==='conjunto';
+      const compNames = isConj && p.componentes ? p.componentes.map(c=>{ const px=produtos.find(x=>x.id===c.prodId); return px?px.nome:'?'; }) : [];
       return `
       <tr draggable="true" data-id="${p.id}" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)" ondragleave="dragLeave(event)" ondragend="dragEnd(event)">
         <td style="padding:0 4px"><span class="drag-handle" title="Arrastar para reordenar">⠿</span></td>
         <td style="color:#999;font-size:12px">${realIdx+1}</td>
-        <td>${p.foto ? `<img src="${p.foto}" class="photo-thumb"/>` : '<span style="font-size:18px;opacity:.2">📷</span>'}</td>
+        <td>${p.foto ? `<img src="${p.foto}" class="photo-thumb"/>` : (isConj?'<span style="font-size:22px">📦</span>':'<span style="font-size:18px;opacity:.2">📷</span>')}</td>
         <td>
-          <div style="font-weight:600">${p.nome}</div>
+          <div style="display:flex;align-items:center;gap:6px;font-weight:600">
+            ${p.nome}
+            ${isConj?`<span style="background:#E6F1FB;color:#185FA5;font-size:10px;padding:1px 7px;border-radius:20px;border:1px solid #B5D4F4;font-weight:600">📦 ${p.componentes?p.componentes.length:0} itens</span>`:''}
+          </div>
           ${p.dim ? `<div style="font-size:12px;color:#888">${p.dim}</div>` : ''}
-          ${p.obs ? `<div style="font-size:11px;color:#bbb">${p.obs}</div>` : ''}
+          ${isConj && compNames.length ? `<div style="font-size:11px;color:#888;margin-top:2px">↳ ${compNames.join(' · ')}</div>` : ''}
+          ${filtroBadges ? `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:3px">${filtroBadges}</div>` : ''}
+          ${conjsDoP.length ? `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:3px">
+            <span style="font-size:10px;color:#888">Conjuntos:</span>
+            ${conjsDoP.map(cj=>`<span class="badge-conj" title="Ver conjunto" onclick="editProduto(${cj.id})">📦 ${cj.nome}</span>`).join('')}
+          </div>` : ''}
+          ${p.obs ? `<div style="font-size:11px;color:#bbb;margin-top:2px">${p.obs}</div>` : ''}
         </td>
         <td>${p.cat ? `<span class="badge-cat">${p.cat}</span>` : '<span style="color:#ccc">—</span>'}</td>
         <td style="text-align:right"><span class="price-tag">${fmtBRL(p.preco)}</span></td>
@@ -992,6 +1166,95 @@ function renderProdutos() {
   const precos = produtos.map(p => p.preco);
   document.getElementById('stat-min').textContent = precos.length ? fmtBRL(Math.min(...precos)) : 'R$ 0';
   document.getElementById('stat-max').textContent = precos.length ? fmtBRL(Math.max(...precos)) : 'R$ 0';
+}
+
+
+// ── CONJUNTOS ────────────────────────────────────────────────────
+let currentComponentes = [];
+
+function setTipoProduto(tipo) {
+  const isCj = tipo === 'conjunto';
+  document.getElementById('tipo-btn-simples').classList.toggle('active', !isCj);
+  document.getElementById('tipo-btn-conjunto').classList.toggle('active', isCj);
+  document.getElementById('conj-picker-wrap').style.display = isCj ? '' : 'none';
+  const wp = document.getElementById('wrap-preco');
+  if(wp) wp.style.opacity = isCj ? '.4' : '1';
+  const inp = document.getElementById('inp-preco');
+  if(inp) inp.readOnly = isCj;
+  if(isCj) renderCompList();
+}
+
+function renderConjDropdown(q) {
+  const dd = document.getElementById('conj-dropdown');
+  if (!q.trim()) { dd.classList.remove('open'); return; }
+  const ql = q.toLowerCase();
+  const ids = currentComponentes.map(c=>c.prodId);
+  const res = produtos.filter(p =>
+    p.tipoProd !== 'conjunto' &&
+    !ids.includes(p.id) &&
+    (p.nome.toLowerCase().includes(ql) || (p.cat||'').toLowerCase().includes(ql) || (p.dim||'').toLowerCase().includes(ql))
+  ).slice(0,8);
+  if(!res.length){ dd.classList.remove('open'); return; }
+  dd.innerHTML = res.map(p=>`
+    <div class="conj-opt" onmousedown="addComponente(${p.id})">
+      ${p.foto?`<img src="${p.foto}" class="conj-opt-img"/>`:`<div class="conj-opt-img" style="display:flex;align-items:center;justify-content:center;font-size:18px">📦</div>`}
+      <div class="conj-opt-info">
+        <div class="conj-opt-nome">${p.nome}</div>
+        <div class="conj-opt-sub">${[p.cat,p.dim].filter(Boolean).join(' · ')}</div>
+      </div>
+      <div class="conj-opt-preco">${fmtBRL(p.preco)}</div>
+    </div>`).join('');
+  dd.classList.add('open');
+}
+
+function closeConjDropdown() {
+  const dd = document.getElementById('conj-dropdown');
+  if(dd) dd.classList.remove('open');
+  const inp = document.getElementById('conj-search-inp');
+  if(inp) inp.value='';
+}
+
+function addComponente(prodId) {
+  if(currentComponentes.some(c=>c.prodId===prodId)) return;
+  currentComponentes.push({ prodId });
+  closeConjDropdown();
+  renderCompList();
+}
+
+function removeComponente(idx) {
+  currentComponentes.splice(idx,1);
+  renderCompList();
+}
+
+function renderCompList() {
+  const wrap = document.getElementById('comp-list');
+  const totEl = document.getElementById('conj-total');
+  const totVal = document.getElementById('conj-total-val');
+  const preco = document.getElementById('inp-preco');
+  if(!wrap) return;
+  if(!currentComponentes.length){
+    wrap.innerHTML = '<div style="font-size:12px;color:#aaa;text-align:center;padding:8px 0">Nenhum componente adicionado ainda.</div>';
+    if(totEl) totEl.style.display='none';
+    return;
+  }
+  let total = 0;
+  wrap.innerHTML = currentComponentes.map((c,i)=>{
+    const p = produtos.find(x=>x.id===c.prodId);
+    if(!p) return '';
+    total += p.preco||0;
+    return `<div class="comp-row">
+      ${p.foto?`<img src="${p.foto}" class="comp-row-img"/>`:`<div class="comp-row-img">📦</div>`}
+      <div class="comp-row-info">
+        <div class="comp-row-nome">${p.nome}</div>
+        <div class="comp-row-sub">${[p.cat,p.dim].filter(Boolean).join(' · ')}</div>
+      </div>
+      <div class="comp-row-preco">${fmtBRL(p.preco)}</div>
+      <button class="btn btn-danger btn-sm" style="padding:2px 8px;font-size:11px;flex-shrink:0" onclick="removeComponente(${i})">✕</button>
+    </div>`;
+  }).join('');
+  if(totEl){ totEl.style.display=''; }
+  if(totVal){ totVal.textContent = fmtBRL(total); }
+  if(preco){ preco.value = total.toFixed(2); }
 }
 
 // ── DRAG & DROP ─────────────────────────────────────────
@@ -1139,12 +1402,21 @@ document.addEventListener('click', e => {
 });
 function onDescChange(id, val)  { const item = items.find(i=>i.id==id); if(item){item.desc=val;updatePreview();} }
 function onPrecoChange(id, val) { const item = items.find(i=>i.id==id); if(item){item.preco=parseFloat(val)||0;updatePreview();} }
+function calcDesconto(sub, pctId, valId) {
+  const pct = parseFloat(document.getElementById(pctId)?.value) || 0;
+  const val = parseFloat(document.getElementById(valId)?.value) || 0;
+  // % tem prioridade; se digitar nos dois, % vence
+  if (pct > 0) return Math.min(sub, sub * pct / 100);
+  return Math.min(sub, val);
+}
 function updatePreview() {
   const sub = items.reduce((s,i)=>s+(parseFloat(i.preco)||0),0);
+  const desc = calcDesconto(sub, 'inp-desc-pct', 'inp-desc-val');
+  const total = sub - desc;
   document.getElementById('sum-subtotal').textContent = fmtBRL(sub);
-  document.getElementById('sum-desconto').textContent = '− ' + fmtBRL(sub*.10);
-  document.getElementById('sum-total').textContent = fmtBRL(sub);
-  document.getElementById('sum-avista').textContent = 'À vista com desconto: ' + fmtBRL(sub*.90);
+  document.getElementById('sum-desconto').textContent = desc > 0 ? '− ' + fmtBRL(desc) : '—';
+  document.getElementById('sum-total').textContent = fmtBRL(total);
+  document.getElementById('sum-avista').textContent = 'À vista com desconto: ' + fmtBRL(total * .90);
 }
 function editarOrcamento(id) {
   const o = orcamentos.find(x => x.id == id); if (!o) return;
@@ -1161,6 +1433,14 @@ function editarOrcamento(id) {
     // Preenche itens
     items = JSON.parse(JSON.stringify(o.items || [{id:Date.now(),prodId:'',desc:'',preco:0}]));
     items.forEach(item => { if(!item.searchText) item.searchText = item.desc.split('\n')[0]; });
+    // Restaurar desconto
+    const dpEl=document.getElementById('inp-desc-pct'); if(dpEl) dpEl.value='';
+    const dvEl=document.getElementById('inp-desc-val'); if(dvEl) dvEl.value='';
+    if(o.desconto && o.subtotal) {
+      const pct = Math.round(o.desconto/o.subtotal*1000)/10;
+      if(Number.isInteger(pct) || pct===Math.round(pct*2)/2) { if(dpEl) dpEl.value=pct; }
+      else { if(dvEl) dvEl.value=o.desconto.toFixed(2); }
+    }
     renderItems(); updatePreview();
     // Muda botão e título
     const btn = document.querySelector('#page-novo .btn-primary[onclick="gerarOrcamento()"]');
@@ -1183,12 +1463,16 @@ function gerarOrcamento() {
     return item;
   });
 
+  const subtotalOrc = validItems.reduce((s,i)=>s+(parseFloat(i.preco)||0),0);
+  const descontoOrc = calcDesconto(subtotalOrc,'inp-desc-pct','inp-desc-val');
   const dados = {
     cliente,
     fone: document.getElementById('oc-fone').value.trim(),
     data: document.getElementById('oc-data').value,
     items: itemsSemFoto,
-    subtotal: validItems.reduce((s,i)=>s+(parseFloat(i.preco)||0),0),
+    subtotal: subtotalOrc,
+    desconto: descontoOrc,
+    total: subtotalOrc - descontoOrc,
     obs: document.getElementById('oc-obs').value.trim(),
   };
 
@@ -1234,7 +1518,7 @@ function renderLista() {
           <div class="quote-meta">${fmtDate(o.data)}${o.fone?' · 📞 '+o.fone:''} · ${o.items.length} item(s)</div>
         </div>
       </div>
-      <span class="quote-total">${fmtBRL(o.subtotal)}</span>
+      <span class="quote-total">${fmtBRL(o.total||o.subtotal)}</span>
       <div style="display:flex;gap:6px">
         <button class="btn btn-ghost btn-sm" onclick="showOrcamento(${o.id})">👁 Ver</button>
         <button class="btn btn-ghost btn-sm" onclick="gerarLinkById(${o.id},this)" style="color:#185FA5;border-color:#B5D4F4">🔗</button>
@@ -1270,7 +1554,7 @@ function showOrcamento(id) {
 function closeModal() { document.getElementById('modal-orc').classList.remove('open'); }
 
 function getHTMLOrc(o) {
-  const avista = o.subtotal * .90;
+  const avista = (o.total||o.subtotal) * .90;
   const dataF = fmtDate(o.data);
   
 
@@ -1283,13 +1567,30 @@ function getHTMLOrc(o) {
     const descHtmlB = nomeB + (restoB ? '<br>' + restoB : '');
     // Bug fix: foto buscada do catálogo pelo prodId (não embutida no item)
     const prodFoto = item.prodId ? (produtos.find(p => p.id == item.prodId)||{}).foto || '' : (item.foto||'');
+    // Detalhamento do conjunto
+    const prodRef = item.prodId ? produtos.find(p => p.id == item.prodId) : null;
+    const conjHtml = (prodRef && prodRef.tipoProd==='conjunto' && prodRef.componentes && prodRef.componentes.length)
+      ? `<div style="margin-top:7px;border-top:1px dashed #ccc;padding-top:6px">
+          <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:#888;font-weight:700;margin-bottom:4px">Composição do conjunto</div>
+          <table style="width:100%;border-collapse:collapse;font-size:.78rem">
+            ${prodRef.componentes.map(c=>{
+              const cp=produtos.find(x=>x.id===c.prodId);
+              if(!cp) return '';
+              return `<tr>
+                <td style="padding:1px 0;color:#555;font-size:.72rem">${cp.nome}</td>
+                <td style="text-align:right;color:#185FA5;font-weight:600;white-space:nowrap;padding-left:12px;font-size:.72rem">${fmtBRL(cp.preco)}</td>
+              </tr>`;
+            }).join('')}
+          </table>
+        </div>`
+      : '';
     return `
     <tr>
       <td class="idx" style="vertical-align:top;padding-top:10px">${String(idx+1).padStart(2,'0')}</td>
       <td>
         <div style="display:table;width:100%">
           ${prodFoto ? `<div style="display:table-cell;width:90px;vertical-align:top;padding-right:12px"><img src="${prodFoto}" style="width:80px;height:80px;object-fit:contain;background:#fff"/></div>` : ''}
-          <div style="display:table-cell;vertical-align:top">${descHtmlB}</div>
+          <div style="display:table-cell;vertical-align:top">${descHtmlB}${conjHtml}</div>
         </div>
       </td>
       <td class="val" style="vertical-align:top;padding-top:10px">${item.preco>0?fmtBRL(item.preco):'—'}</td>
@@ -1322,15 +1623,15 @@ function getHTMLOrc(o) {
           </div>
         </div>`).join('')}
     </div>` : '';
-  const projetoPrintHtml = projetoItens.length ? `
-    <div class="projeto-print-page" style="page-break-before:always;margin-top:0">
-      <div style="background:#003366;color:#fff;padding:14px 16px;font-size:20pt;font-weight:700;text-align:center;letter-spacing:3px;margin-bottom:24px;border-radius:4px 4px 0 0">PROJETO</div>
-      ${projetoItens.map(it => `
-        <div style="margin-bottom:28px">
-          <div style="font-weight:700;font-size:13pt;color:#003366;border-bottom:2px solid #003366;padding-bottom:6px;margin-bottom:14px">${it.nome}</div>
-          ${it.fotos.map(src => `<div style="margin-bottom:12px;text-align:center"><img src="${src}" style="max-width:100%;max-height:220mm;object-fit:contain"/></div>`).join('')}
-        </div>`).join('')}
-    </div>` : '';
+  const projetoPrintHtml = projetoItens.length ? projetoItens.map(it =>
+    it.fotos.map(src => `
+    <div class="projeto-print-page" style="page-break-before:always;margin:0;padding:0;width:100%;height:267mm;display:flex;flex-direction:column">
+      <div style="font-size:8pt;color:#888;text-align:center;padding:3mm 0 2mm;font-weight:500;letter-spacing:.5px;flex-shrink:0">${it.nome}</div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden">
+        <img src="${src}" style="max-width:100%;max-height:100%;object-fit:contain;display:block"/>
+      </div>
+    </div>`).join('')
+  ).join('') : '';
 
 
   return `<!DOCTYPE html>
@@ -1449,9 +1750,13 @@ function getHTMLOrc(o) {
     <tbody>
       ${rows}
       ${kitRow}
+      ${o.desconto > 0 ? `<tr style="font-size:11pt;color:#3B6D11">
+        <td colspan="2" style="text-align:right;padding:4px 10px;border:none">Desconto aplicado:</td>
+        <td class="val" style="padding:4px 10px;border:none;color:#3B6D11;font-weight:600">− ${fmtBRL(o.desconto)}</td>
+      </tr>` : ''}
       <tr class="total-tr">
         <td colspan="2" style="text-align:right">VALOR TOTAL DO PEDIDO:</td>
-        <td class="val">${fmtBRL(o.subtotal)}</td>
+        <td class="val">${fmtBRL(o.total||o.subtotal)}</td>
       </tr>
     </tbody>
   </table>
@@ -1479,8 +1784,8 @@ function getHTMLOrc(o) {
       <div class="pay-icon">💳</div>
       <div class="pay-title">Cartão de Crédito</div>
       <div class="pay-info">
-        <span style="font-size:15pt;font-weight:700;color:#003366">${fmtBRL(o.subtotal)}</span><br>
-        <span style="font-size:12pt;color:#003366">Em até 12x sem juros de <strong>${fmtBRL(Math.ceil(o.subtotal / 12 * 100) / 100)}</strong> cada parcela</span>
+        <span style="font-size:15pt;font-weight:700;color:#003366">${fmtBRL(o.total||o.subtotal)}</span><br>
+        <span style="font-size:12pt;color:#003366">Em até 12x sem juros de <strong>${fmtBRL(Math.ceil((o.total||o.subtotal) / 12 * 100) / 100)}</strong> cada parcela</span>
       </div>
     </div>
     <div class="pay-cell">
@@ -1896,10 +2201,12 @@ function onDescChangePd(idx,val){if(itemsPedido[idx]){itemsPedido[idx].desc=val;
 function onPrecoChangePd(idx,val){if(itemsPedido[idx]){itemsPedido[idx].preco=parseFloat(val)||0;updatePreviewPd();}}
 function updatePreviewPd(){
   const sub=itemsPedido.reduce((s,i)=>s+(parseFloat(i.preco)||0),0);
+  const desc=calcDesconto(sub,'pd-inp-desc-pct','pd-inp-desc-val');
+  const total=sub-desc;
   document.getElementById('pd-sum-subtotal').textContent=fmtBRL(sub);
-  document.getElementById('pd-sum-desconto').textContent='− '+fmtBRL(sub*.10);
-  document.getElementById('pd-sum-total').textContent=fmtBRL(sub);
-  document.getElementById('pd-sum-avista').textContent='À vista com desconto: '+fmtBRL(sub*.90);
+  document.getElementById('pd-sum-desconto').textContent=desc>0?'− '+fmtBRL(desc):'—';
+  document.getElementById('pd-sum-total').textContent=fmtBRL(total);
+  document.getElementById('pd-sum-avista').textContent='À vista com desconto: '+fmtBRL(total*.90);
 }
 function resetPedidoForm(){
   pedidoEditandoId = null;
@@ -1908,6 +2215,8 @@ function resetPedidoForm(){
   const proxNum=pedidos.length?Math.max(...pedidos.map(p=>p.num||0))+1:1;
   document.getElementById('pd-numero').value=proxNum;
   itemsPedido=[{id:Date.now(),prodId:'',desc:'',preco:0}];
+  const rpPct=document.getElementById('pd-inp-desc-pct'); if(rpPct) rpPct.value='';
+  const rpVal=document.getElementById('pd-inp-desc-val'); if(rpVal) rpVal.value='';
   renderItemsPedido(); updatePreviewPd();
   // Reset botão e título
   const btn = document.querySelector('#page-novo-pedido .btn-success');
@@ -1924,13 +2233,13 @@ function formatFoneWA(fone) {
 }
 
 function buildMsgOrc(o) {
-  const avista=(o.subtotal*.90).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-  const parc=(Math.ceil(o.subtotal/12*100)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  const avista=((o.total||o.subtotal)*.90).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  const parc=(Math.ceil((o.total||o.subtotal)/12*100)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
   const itens=o.items.map((it,i)=>`  ${String(i+1).padStart(2,'0')}. ${it.desc.split('\n')[0]}${it.preco>0?' — '+fmtBRL(it.preco):''}`).join('\n');
   return ['🛡️ *AÇO NAVAL* — Orçamento Nº '+String(o.num).padStart(3,'0'),'',
     '👤 *'+o.cliente+'*','📅 Data: '+fmtDate(o.data),'',
     '📋 *Itens:*',itens,'',
-    '💰 *Total: '+fmtBRL(o.subtotal)+'*',
+    '💰 *Total: '+fmtBRL(o.total||o.subtotal)+'*',
     '💚 À vista com 10% desc: *'+avista+'*',
     '💳 Até 12x sem juros de *'+parc+'*','',
     '✅ Frete grátis · Somente ao receber','',
@@ -1946,7 +2255,7 @@ function buildMsgPed(p) {
     '👤 *'+p.nome+'*', p.cpf?'📄 '+p.cpf:'', end?'📍 '+end:'',
     '📅 Data: '+fmtDate(p.data), p.prazo?'⏰ Prazo: '+p.prazo:'','',
     '📋 *Itens:*',itens,'',
-    '💰 *Total: '+fmtBRL(p.subtotal)+'*',
+    '💰 *Total: '+fmtBRL(p.total||p.subtotal)+'*',
     '💚 À vista com 10% desc: *'+avista+'*',
     '💳 Até 12x sem juros de *'+parc+'*','',
     '✅ Frete grátis · Somente ao receber','',
@@ -2122,6 +2431,8 @@ function gerarPedido() {
     obs:    document.getElementById('pd-obs').value.trim(),
     items:  JSON.parse(JSON.stringify(validItems)),
     subtotal: validItems.reduce((s, i) => s + (parseFloat(i.preco) || 0), 0),
+    desconto: calcDesconto(validItems.reduce((s,i)=>s+(parseFloat(i.preco)||0),0),'pd-inp-desc-pct','pd-inp-desc-val'),
+    get total(){ return this.subtotal - this.desconto; },
   };
 
   if (pedidoEditandoId) {
@@ -2187,7 +2498,7 @@ function renderListaPedidos(){
           ${assinado && p.assinatura ? `<div style="font-size:11px;color:#1a7a44;margin-top:2px">✍️ ${p.assinatura.nome} · ${new Date(p.assinatura.data).toLocaleString('pt-BR')}</div>` : ''}
         </div>
       </div>
-      <span class="quote-total">${fmtBRL(p.subtotal)}</span>
+      <span class="quote-total">${fmtBRL(p.total||p.subtotal)}</span>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         <button class="btn btn-ghost btn-sm" onclick="showPedido(${p.id})">👁 Ver</button>
         <button class="btn btn-sm" onclick="enviarLinkAssinatura(${p.id},${p.num})" style="background:#25D366;color:#fff;border:none" title="Copiar link para assinatura">🔗 Link Assinatura</button>
@@ -2265,12 +2576,30 @@ function getHTMLPed(p) {
     const nome = `<strong style="text-transform:uppercase">${lines[0]}</strong>`;
     const resto = lines.slice(1).join('<br>');
     const descHtmlB = nome + (resto ? '<br><span style="font-weight:normal">' + resto + '</span>' : '');
+    // Detalhamento do conjunto no pedido
+    const prodRefPd = item.prodId ? produtos.find(x => x.id == item.prodId) : null;
+    const conjHtmlPd = (prodRefPd && prodRefPd.tipoProd==='conjunto' && prodRefPd.componentes && prodRefPd.componentes.length)
+      ? `<div style="margin-top:7px;border-top:1px dashed #ccc;padding-top:6px">
+          <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:#888;font-weight:700;margin-bottom:4px">Composição do conjunto</div>
+          <table style="width:100%;border-collapse:collapse;font-size:.78rem">
+            ${prodRefPd.componentes.map(c=>{
+              const cp=produtos.find(x=>x.id===c.prodId);
+              if(!cp) return '';
+              return `<tr>
+                <td style="padding:1px 0;color:#555;font-size:.72rem">${cp.nome}</td>
+                <td style="text-align:right;color:#185FA5;font-weight:600;white-space:nowrap;padding-left:12px;font-size:.72rem">${fmtBRL(cp.preco)}</td>
+              </tr>`;
+            }).join('')}
+          </table>
+        </div>`
+      : '';
+
     return `<tr>
       <td class="idx" style="vertical-align:top;padding-top:10px">${String(idx+1).padStart(2,'0')}</td>
       <td>
         <div style="display:table;width:100%">
           ${item.foto?`<div style="display:table-cell;width:90px;vertical-align:top;padding-right:12px"><img src="${item.foto}" style="width:80px;height:80px;object-fit:contain;background:#fff"/></div>`:''}
-          <div style="display:table-cell;vertical-align:top">${descHtmlB}</div>
+          <div style="display:table-cell;vertical-align:top">${descHtmlB}${conjHtmlPd}</div>
         </div>
       </td>
       <td class="val" style="vertical-align:top;padding-top:10px">${item.preco>0?fmtBRL(item.preco):'—'}</td>
@@ -2297,15 +2626,15 @@ function getHTMLPed(p) {
           </div>
         </div>`).join('')}
     </div>` : '';
-  const projetoPrintPedHtml = projetoItensPed.length ? `
-    <div class="projeto-print-page" style="page-break-before:always;margin-top:0">
-      <div style="background:#003366;color:#fff;padding:14px 16px;font-size:20pt;font-weight:700;text-align:center;letter-spacing:3px;margin-bottom:24px;border-radius:4px 4px 0 0">PROJETO</div>
-      ${projetoItensPed.map(it => `
-        <div style="margin-bottom:28px">
-          <div style="font-weight:700;font-size:13pt;color:#003366;border-bottom:2px solid #003366;padding-bottom:6px;margin-bottom:14px">${it.nome}</div>
-          ${it.fotos.map(src => `<div style="margin-bottom:12px;text-align:center"><img src="${src}" style="max-width:100%;max-height:220mm;object-fit:contain"/></div>`).join('')}
-        </div>`).join('')}
-    </div>` : '';
+  const projetoPrintPedHtml = projetoItensPed.length ? projetoItensPed.map(it =>
+    it.fotos.map(src => `
+    <div class="projeto-print-page" style="page-break-before:always;margin:0;padding:0;width:100%;height:267mm;display:flex;flex-direction:column">
+      <div style="font-size:8pt;color:#888;text-align:center;padding:3mm 0 2mm;font-weight:500;letter-spacing:.5px;flex-shrink:0">${it.nome}</div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden">
+        <img src="${src}" style="max-width:100%;max-height:100%;object-fit:contain;display:block"/>
+      </div>
+    </div>`).join('')
+  ).join('') : '';
   return `<!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="utf-8">
 <title>${pdfTitle}</title>
