@@ -56,8 +56,8 @@ body{background:#f5f7fa;color:#222;min-height:100vh}
 .form-textarea{resize:vertical;min-height:70px}
 
 /* ── SLIDE PANEL ── */
-.slide-panel{overflow:hidden;max-height:0;transition:max-height .4s ease;visibility:hidden}
-.slide-panel.open{max-height:900px;visibility:visible}
+.slide-panel{overflow:hidden;max-height:0;transition:max-height .5s ease;visibility:hidden}
+.slide-panel.open{max-height:3000px;visibility:visible}
 /* ── PHOTO UPLOAD ── */
 .photo-upload-area{border:2px dashed #d0d4d8;border-radius:8px;padding:16px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;background:#fafbfc}
 .photo-upload-area:hover{border-color:#185FA5;background:#f0f6ff}
@@ -87,6 +87,14 @@ body{background:#f5f7fa;color:#222;min-height:100vh}
 .sub-chip{padding:3px 11px;border-radius:999px;border:1px solid #d0d4d8;background:#fff;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;color:#555}
 .sub-chip:hover{filter:brightness(.93)}
 .filtros-panel{margin-bottom:12px}
+.cat-card{background:#f8fafc;border:1px solid #e0e4e8;border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.cat-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cat-card-name{font-size:13px;font-weight:700;color:#003366}
+.cat-filtros-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;min-height:22px}
+.cat-filtro-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:#E6F1FB;color:#185FA5;border:1px solid #B5D4F4;border-radius:20px;font-size:11px;font-weight:600}
+.cat-filtro-chip button{background:none;border:none;color:#185FA5;cursor:pointer;font-size:11px;padding:0;line-height:1;opacity:.6}
+.cat-filtro-chip button:hover{opacity:1}
+.cat-add-filtro-row{display:flex;gap:5px;align-items:center}
 .filtro-def-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f5f7fa;border-radius:6px;margin-bottom:5px}
 .filtro-def-name{flex:1;font-size:13px;font-weight:500;color:#003366}
 .filtro-add-row{display:flex;gap:6px;margin-top:6px}
@@ -133,7 +141,7 @@ tbody tr:hover{background:#fafbfc}
 .td-actions{display:flex;gap:6px;justify-content:flex-end}
 
 /* ── ITEM ROW ── */
-.item-row{display:grid;grid-template-columns:1fr 2fr 140px 38px;gap:8px;align-items:end;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #f0f2f5}
+.item-row{display:grid;grid-template-columns:90px 1fr 2fr 120px 38px;gap:8px;align-items:end;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #f0f2f5}
 .item-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
 
 /* ── CHIPS ── */
@@ -270,19 +278,23 @@ tbody tr:hover{background:#fafbfc}
   <div class="sec-header">
     <div class="sec-title">Cadastro de Produtos <small>Gerencie os produtos e valores do catálogo</small></div>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <button class="btn btn-ghost btn-sm" onclick="toggleFiltrosPanel()">⚙️ Personalizar filtros</button>
+      <button class="btn btn-ghost btn-sm" onclick="toggleFiltrosPanel()">🗂️ Categorias e Filtros</button>
       <button class="btn btn-primary" onclick="toggleProdForm()">＋ Novo Produto</button>
     </div>
   </div>
 
-  <!-- PAINEL GERENCIAR FILTROS -->
+  <!-- PAINEL CATEGORIAS E FILTROS -->
   <div class="card slide-panel filtros-panel" id="filtros-panel">
-    <div style="font-size:13px;font-weight:700;color:#003366;margin-bottom:10px">Filtros personalizados</div>
-    <div style="font-size:12px;color:#888;margin-bottom:10px">Crie os filtros que quiser (ex: Largura, Material, Potência). Aparecem no formulário e na listagem de produtos.</div>
+    <div style="font-size:13px;font-weight:700;color:#003366;margin-bottom:4px">🗂️ Categorias e Filtros</div>
+    <div style="font-size:12px;color:#888;margin-bottom:14px">Gerencie as categorias do catálogo e os filtros de cada uma. Ao cadastrar um produto, você escolhe a categoria por seleção.</div>
     <div id="filtros-def-list"></div>
-    <div class="filtro-add-row">
-      <input class="form-input" id="inp-novo-filtro" placeholder="Nome do novo filtro (ex: Material)" style="font-size:13px" onkeydown="if(event.key==='Enter')addFiltroDef()"/>
-      <button class="btn btn-primary btn-sm" onclick="addFiltroDef()">＋ Adicionar</button>
+    <!-- Adicionar nova categoria -->
+    <div style="border-top:1px solid #f0f2f5;padding-top:12px;margin-top:4px">
+      <div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Nova Categoria</div>
+      <div class="filtro-add-row">
+        <input class="form-input" id="inp-nova-cat" placeholder="Ex: Fogão, Chaminé, Churrasqueira..." style="font-size:13px" onkeydown="if(event.key==='Enter')addCategoria()"/>
+        <button class="btn btn-primary btn-sm" onclick="addCategoria()">＋ Criar</button>
+      </div>
     </div>
   </div>
 
@@ -305,7 +317,11 @@ tbody tr:hover{background:#fafbfc}
       </div>
       <div class="grid2">
         <div class="form-group" id="wrap-preco"><label class="form-label">Valor Unitário (R$)</label><input class="form-input" id="inp-preco" type="number" min="0" step="0.01" placeholder="0,00"/></div>
-        <div class="form-group"><label class="form-label">Categoria</label><input class="form-input" id="inp-cat" placeholder="Ex: Fogão, Chaminé, Acessórios..."/></div>
+        <div class="form-group"><label class="form-label">Categoria</label>
+          <select class="form-input" id="inp-cat" onchange="renderFiltrosExtrasForm()" style="cursor:pointer">
+            <option value="">Selecione a categoria...</option>
+          </select>
+        </div>
       </div>
       <!-- PAINEL CONJUNTO -->
       <div id="conj-picker-wrap" style="display:none">
@@ -709,8 +725,9 @@ let produtos = [];
 let orcamentos = [];
 let items = [];
 let currentOrcamento = null;
-let filtrosDef = [];      // ex: ["Largura","Material","Tipo"]
+let filtrosDef = {};      // ex: { "Fogão": ["Largura","Material"], "Chaminé": ["Diâmetro"] }
 let filtrosAtivos = {};   // ex: {"Largura":"70cm"}
+let categorias = [];      // ex: ["Fogão", "Chaminé", "Churrasqueira"]
 
 // Paleta de cores para os filtros (cicla pelo índice)
 const FILTRO_CORES = [
@@ -794,7 +811,7 @@ async function save() {
     await Promise.all([
       colOrc.doc('orcamentos').set({ lista: orcSemFoto }),
       colOrc.doc('produtos_index').set({ ids: produtos.map(p => p.id) }),
-      colOrc.doc('config').set({ filtrosDef })
+      colOrc.doc('config').set({ filtrosDef, categorias })
     ]);
 
     // Cada produto em seu próprio documento
@@ -835,7 +852,16 @@ async function loadFromFirebase() {
 
     if (orcSnap.exists) orcamentos = orcSnap.data().lista || [];
     if (pedSnap.exists) pedidos = pedSnap.data().lista || [];
-    if (cfgSnap.exists) filtrosDef = cfgSnap.data().filtrosDef || [];
+    if (cfgSnap.exists) {
+      filtrosDef = cfgSnap.data().filtrosDef || {};
+      if (Array.isArray(filtrosDef)) filtrosDef = {}; // migração do formato antigo
+      categorias = cfgSnap.data().categorias || [];
+    }
+    // Migração: se não há categorias salvas, extrai dos produtos existentes
+    if (!categorias.length && produtos.length) {
+      categorias = [...new Set(produtos.map(p=>p.cat).filter(Boolean))];
+      await saveConfig();
+    }
 
     setStatus('☁️ Online', 'ok');
     return true;
@@ -849,7 +875,12 @@ async function loadFromFirebase() {
     }
     produtos   = JSON.parse(localStorage.getItem('acn_produtos') || '[]');
     orcamentos = JSON.parse(localStorage.getItem('acn_orcamentos') || '[]');
-    filtrosDef = JSON.parse(localStorage.getItem('acn_filtros_def') || '[]');
+    filtrosDef = JSON.parse(localStorage.getItem('acn_filtros_def') || '{}');
+    if (Array.isArray(filtrosDef)) filtrosDef = {};
+    categorias = JSON.parse(localStorage.getItem('acn_categorias') || '[]');
+    if (!categorias.length && produtos.length) {
+      categorias = [...new Set(produtos.map(p=>p.cat).filter(Boolean))];
+    }
     return false;
   }
 }
@@ -871,12 +902,12 @@ function toggleProdForm(open) {
   const p = document.getElementById('prod-form-panel');
   const wasOpen = p.classList.contains('open');
   p.classList.toggle('open', open !== undefined ? open : !wasOpen);
-  if(!wasOpen || open===true) renderFiltrosExtrasForm();
+  if(!wasOpen || open===true) { populateCatSelect(); renderFiltrosExtrasForm(); }
 }
 function cancelProdForm() { toggleProdForm(false); clearProdForm(); }
 function clearProdForm() {
-  ['inp-nome','inp-dim','inp-preco','inp-cat','inp-obs'].forEach(id => document.getElementById(id).value = '');
-  filtrosDef.forEach(f => { const el=document.getElementById('inp-f-'+slugify(f)); if(el) el.value=''; });
+  ['inp-nome','inp-dim','inp-preco','inp-cat','inp-obs'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  Object.values(filtrosDef).flat().forEach(f => { const el=document.getElementById('inp-f-'+slugify(f)); if(el) el.value=''; });
   document.getElementById('edit-prod-id').value = '';
   document.getElementById('prod-form-title').textContent = 'Novo Produto';
   currentFotoBase64 = null;
@@ -951,7 +982,8 @@ function saveProduto() {
   const cat  = document.getElementById('inp-cat').value.trim();
   const obs  = document.getElementById('inp-obs').value.trim();
   const filtros = {};
-  filtrosDef.forEach(f => { const el=document.getElementById('inp-f-'+slugify(f)); if(el) filtros[f]=el.value.trim(); });
+  const catFs = filtrosDef[cat] || [];
+  catFs.forEach(f => { const el=document.getElementById('inp-f-'+slugify(f)); if(el) filtros[f]=el.value.trim(); });
   const tipoProd = document.getElementById('tipo-btn-conjunto').classList.contains('active') ? 'conjunto' : 'simples';
   const componentes = tipoProd==='conjunto' ? [...currentComponentes] : [];
   const precoFinal = tipoProd==='conjunto'
@@ -964,12 +996,15 @@ function saveProduto() {
   if (eid) {
     const idx = produtos.findIndex(p => p.id == eid);
     if (idx >= 0) {
-      produtos[idx] = { ...produtos[idx], nome, dim, preco:precoFinal, cat, obs, filtros, tipoProd, componentes };
+      const codigoExistente = produtos[idx].codigo; // preserva o código já atribuído
+      produtos[idx] = { ...produtos[idx], nome, dim, preco:precoFinal, cat, obs, codigo:codigoExistente, filtros, tipoProd, componentes };
       if (currentFotoBase64 !== null) produtos[idx].foto = currentFotoBase64;
       produtos[idx].fotosprojeto = [...currentFotosProjetoBase64];
     }
   } else {
-    produtos.push({ id: Date.now(), nome, dim, preco:precoFinal, cat, obs, filtros, tipoProd, componentes, foto: currentFotoBase64 || '', fotosprojeto: [...currentFotosProjetoBase64] });
+    // Auto-atribui código sequencial
+    const proximoCodigo = Math.max(0, ...produtos.map(p => parseInt(p.codigo)||0)) + 1;
+    produtos.push({ id: Date.now(), nome, dim, preco:precoFinal, cat, obs, codigo:proximoCodigo, filtros, tipoProd, componentes, foto: currentFotoBase64 || '', fotosprojeto: [...currentFotosProjetoBase64] });
   }
   save(); renderProdutos(); cancelProdForm();
 }
@@ -978,10 +1013,12 @@ function editProduto(id) {
   document.getElementById('inp-nome').value = p.nome;
   document.getElementById('inp-dim').value  = p.dim || '';
   document.getElementById('inp-preco').value = p.preco;
+  populateCatSelect();
   document.getElementById('inp-cat').value  = p.cat || '';
   document.getElementById('inp-obs').value  = p.obs || '';
   renderFiltrosExtrasForm();
-  filtrosDef.forEach(f => { const el=document.getElementById('inp-f-'+slugify(f)); if(el) el.value=(p.filtros&&p.filtros[f])||''; });
+  const catFsEdit = filtrosDef[p.cat] || [];
+  catFsEdit.forEach(f => { const el=document.getElementById('inp-f-'+slugify(f)); if(el) el.value=(p.filtros&&p.filtros[f])||''; });
   currentComponentes = p.componentes ? [...p.componentes] : [];
   setTipoProduto(p.tipoProd||'simples');
   document.getElementById('edit-prod-id').value = p.id;
@@ -1006,41 +1043,94 @@ function setFiltroAtivo(nome, val) { filtrosAtivos[nome] = val; renderProdutos()
 // Utilitário: slug para IDs de input
 function slugify(s){ return s.toLowerCase().replace(/[^a-z0-9]/g,'-'); }
 
-// ── Painel de gestão de filtros ─────────────────────────────
+// ── Painel de Categorias e Filtros ──────────────────────────
 function toggleFiltrosPanel(){
   const p=document.getElementById('filtros-panel');
   p.classList.toggle('open');
   renderFiltrosDefPanel();
 }
+
 function renderFiltrosDefPanel(){
   const wrap=document.getElementById('filtros-def-list');
   if(!wrap) return;
-  if(!filtrosDef.length){ wrap.innerHTML='<div style="font-size:12px;color:#aaa;margin-bottom:6px">Nenhum filtro criado ainda.</div>'; return; }
-  wrap.innerHTML = filtrosDef.map((f,i)=>{
-    const c=corFiltro(i);
-    return `<div class="filtro-def-item">
-      <span style="width:14px;height:14px;border-radius:3px;background:${c.bg};border:1px solid ${c.border};display:inline-block;flex-shrink:0"></span>
-      <span class="filtro-def-name">${f}</span>
-      <button class="btn btn-danger btn-sm" style="padding:2px 8px;font-size:11px" onclick="removeFiltroDef(${i})">✕ Remover</button>
-    </div>`;
-  }).join('');
+  if(!categorias.length){
+    wrap.innerHTML='<div style="font-size:12px;color:#aaa;margin-bottom:10px">Nenhuma categoria criada ainda. Crie a primeira abaixo.</div>';
+  } else {
+    wrap.innerHTML = categorias.map(cat=>{
+      const fs = filtrosDef[cat] || [];
+      return `<div class="cat-card">
+        <div class="cat-card-header">
+          <span class="cat-card-name">📂 ${cat}</span>
+          <button class="btn btn-danger btn-sm" style="padding:2px 8px;font-size:11px" onclick="removeCategoria('${cat.replace(/'/g,"\\'")}')">✕ Remover categoria</button>
+        </div>
+        <div class="cat-filtros-row" id="filtros-row-${slugify(cat)}">
+          ${fs.length
+            ? fs.map((f,i)=>`<span class="cat-filtro-chip">${f}<button onclick="removeFiltroDef('${cat.replace(/'/g,"\\'")}',${i})" title="Remover filtro">✕</button></span>`).join('')
+            : '<span style="font-size:11px;color:#bbb">Nenhum filtro — adicione abaixo</span>'}
+        </div>
+        <div class="cat-add-filtro-row">
+          <input class="form-input" id="inp-f-novo-${slugify(cat)}" placeholder="Novo filtro (ex: Largura)" style="font-size:12px;padding:5px 8px" onkeydown="if(event.key==='Enter')addFiltroDef('${cat.replace(/'/g,"\\'")}')"/>
+          <button class="btn btn-ghost btn-sm" style="font-size:12px;white-space:nowrap" onclick="addFiltroDef('${cat.replace(/'/g,"\\'")}')">＋ Filtro</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  populateCatSelect();
 }
-function addFiltroDef(){
-  const inp=document.getElementById('inp-novo-filtro');
+
+function populateCatSelect(){
+  // Popula o select de categoria no formulário de produto
+  const sel=document.getElementById('inp-cat');
+  if(!sel) return;
+  const atual=sel.value;
+  sel.innerHTML='<option value="">Selecione a categoria...</option>'+categorias.map(c=>`<option value="${c}"${atual===c?' selected':''}>${c}</option>`).join('');
+}
+
+function addCategoria(){
+  const inp=document.getElementById('inp-nova-cat');
   const nome=inp.value.trim();
   if(!nome) return;
-  if(filtrosDef.includes(nome)) return alert('Já existe um filtro com esse nome.');
-  filtrosDef.push(nome);
+  if(categorias.includes(nome)) return alert('Essa categoria já existe.');
+  categorias.push(nome);
+  inp.value='';
+  renderFiltrosDefPanel();
+  saveConfig();
+  renderProdutos();
+}
+
+function removeCategoria(cat){
+  const nProd = produtos.filter(p=>p.cat===cat).length;
+  const aviso = nProd ? `\n\nAtenção: ${nProd} produto(s) estão nessa categoria e ficarão sem categoria.` : '';
+  showConfirm('Remover categoria "'+cat+'"','A categoria e todos os seus filtros serão removidos.'+aviso, ()=>{
+    categorias = categorias.filter(c=>c!==cat);
+    delete filtrosDef[cat];
+    renderFiltrosDefPanel();
+    renderFiltrosExtrasForm();
+    saveConfig();
+    renderProdutos();
+  });
+}
+
+function addFiltroDef(cat){
+  const inp=document.getElementById('inp-f-novo-'+slugify(cat));
+  if(!inp) return;
+  const nome=inp.value.trim();
+  if(!nome) return alert('Digite o nome do filtro.');
+  if(!filtrosDef[cat]) filtrosDef[cat]=[];
+  if(filtrosDef[cat].includes(nome)) return alert('Já existe um filtro "'+nome+'" nessa categoria.');
+  filtrosDef[cat].push(nome);
   inp.value='';
   renderFiltrosDefPanel();
   renderFiltrosExtrasForm();
   saveConfig();
-  renderProdutos();
 }
-function removeFiltroDef(idx){
-  const nome = filtrosDef[idx];
-  showConfirm('Remover filtro "'+nome+'"','O filtro será removido da listagem. Os valores já salvos nos produtos continuarão armazenados.', ()=>{
-    filtrosDef.splice(idx,1);
+
+function removeFiltroDef(cat, idx){
+  const nome = (filtrosDef[cat]||[])[idx];
+  if(!nome) return;
+  showConfirm('Remover filtro "'+nome+'"','O filtro será removido de "'+cat+'". Valores já salvos nos produtos continuarão armazenados.', ()=>{
+    filtrosDef[cat].splice(idx,1);
+    if(!filtrosDef[cat].length) delete filtrosDef[cat];
     delete filtrosAtivos[nome];
     renderFiltrosDefPanel();
     renderFiltrosExtrasForm();
@@ -1050,8 +1140,9 @@ function removeFiltroDef(idx){
 }
 async function saveConfig(){
   try {
-    await db.collection('acn').doc('config').set({ filtrosDef });
+    await db.collection('acn').doc('config').set({ filtrosDef, categorias });
     localStorage.setItem('acn_filtros_def', JSON.stringify(filtrosDef));
+    localStorage.setItem('acn_categorias', JSON.stringify(categorias));
   } catch(e){ console.error('saveConfig error',e); }
 }
 
@@ -1059,12 +1150,15 @@ async function saveConfig(){
 function renderFiltrosExtrasForm(){
   const wrap=document.getElementById('filtros-extras-form');
   if(!wrap) return;
-  if(!filtrosDef.length){ wrap.innerHTML=''; return; }
+  const sel=document.getElementById('inp-cat');
+  const cat=(sel?.value||'').trim();
+  const fs=filtrosDef[cat]||[];
+  if(!cat||!fs.length){ wrap.innerHTML=''; return; }
   wrap.innerHTML = `<div style="border-top:1px solid #f0f2f5;margin:10px 0 10px;padding-top:10px">
-    <div style="font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Filtros personalizados</div>
+    <div style="font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Filtros de ${cat}</div>
     <div class="grid2">` +
-    filtrosDef.map((f,i)=>{
-      const vals=[...new Set(produtos.map(p=>p.filtros&&p.filtros[f]).filter(Boolean))];
+    fs.map((f,i)=>{
+      const vals=[...new Set(produtos.filter(p=>p.cat===cat).map(p=>p.filtros&&p.filtros[f]).filter(Boolean))];
       const dl='dl-f-'+slugify(f);
       return `<div class="form-group" style="margin-bottom:0">
         <label class="form-label">${f}</label>
@@ -1088,9 +1182,10 @@ function renderProdutos() {
 
   /* ── Subfilters dinâmicos ── */
   const sw = document.getElementById('subfilters-wrap');
-  if(filtrosDef.length){
+  const catFiltros = filtrosDef[filtroCategoria] || [];
+  if(filtroCategoria && catFiltros.length){
     sw.style.display='';
-    sw.innerHTML = filtrosDef.map((f,i)=>{
+    sw.innerHTML = catFiltros.map((f,i)=>{
       const vals=[...new Set(lista.map(p=>p.filtros&&p.filtros[f]).filter(Boolean))];
       if(!vals.length) return '';
       const c=corFiltro(i);
@@ -1125,7 +1220,7 @@ function renderProdutos() {
   } else {
     tbody.innerHTML = lista.map((p) => {
       const realIdx = produtos.findIndex(x=>x.id===p.id);
-      const filtroBadges = filtrosDef.map((f,i)=>{
+      const filtroBadges = (filtrosDef[p.cat]||[]).map((f,i)=>{
         const v=p.filtros&&p.filtros[f]; if(!v) return '';
         const c=corFiltro(i);
         return `<span style="background:${c.bg};color:${c.text};border:1px solid ${c.border};font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600">${f}: ${v}</span>`;
@@ -1146,6 +1241,7 @@ function renderProdutos() {
             ${isConj?`<span style="background:#E6F1FB;color:#185FA5;font-size:10px;padding:1px 7px;border-radius:20px;border:1px solid #B5D4F4;font-weight:600">📦 ${p.componentes?p.componentes.length:0} itens</span>`:''}
           </div>
           ${p.dim ? `<div style="font-size:12px;color:#888">${p.dim}</div>` : ''}
+          ${p.codigo ? `<div style="font-size:11px;color:#888;font-style:italic">Cód: ${p.codigo}</div>` : ''}
           ${isConj && compNames.length ? `<div style="font-size:11px;color:#888;margin-top:2px">↳ ${compNames.join(' · ')}</div>` : ''}
           ${filtroBadges ? `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:3px">${filtroBadges}</div>` : ''}
           ${conjsDoP.length ? `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:3px">
@@ -1323,6 +1419,15 @@ function renderItems() {
   c.innerHTML = items.map(item => `
     <div class="item-row">
       <div>
+        <label class="form-label">Código</label>
+        <input class="form-input" id="cod-${item.id}" placeholder="Cód..." autocomplete="off"
+          value="${item.codigoInput||''}"
+          oninput="onCodInputOrc(${item.id},this.value)"
+          onblur="buscarPorCodigo(${item.id})"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();buscarPorCodigo(${item.id});}"
+          title="Digite o código e Tab ou Enter para buscar"/>
+      </div>
+      <div>
         <label class="form-label">Buscar Produto</label>
         <div class="ac-wrap">
           <input class="form-input" id="search-${item.id}" placeholder="Digite o nome do produto..." autocomplete="off"
@@ -1348,6 +1453,18 @@ function renderItems() {
     </div>`).join('');
 }
 let acIndex = {};
+function onCodInputOrc(id, val) {
+  const item = items.find(i=>i.id==id); if(!item) return;
+  item.codigoInput = val;
+}
+function buscarPorCodigo(id) {
+  const item = items.find(i=>i.id==id); if(!item) return;
+  const cod = (item.codigoInput||'').trim();
+  if(!cod) return; // sem código digitado, não faz nada
+  const prod = produtos.find(p=>String(p.codigo||'')=== cod);
+  if(!prod) { const el=document.getElementById('cod-'+id); if(el){el.style.borderColor='#e74c3c';setTimeout(()=>{el.style.borderColor='';},1500);} return; }
+  selectProd(id, prod.id);
+}
 function onSearchInput(id, val) {
   const item = items.find(i=>i.id==id); if(!item) return;
   item.searchText = val;
@@ -1366,7 +1483,7 @@ function openDropdown(id) {
     <div class="ac-item${i===acIndex[id]?' active':''}" onmousedown="selectProd(${id},${p.id})">
       <div class="ac-item-info">
         <div class="ac-item-name">${p.nome}</div>
-        ${p.dim||p.cat ? `<div class="ac-item-sub">${[p.cat,p.dim].filter(Boolean).join(' · ')}</div>` : ''}
+        ${p.dim||p.cat||p.codigo ? `<div class="ac-item-sub">${[p.codigo?'Cód: '+p.codigo:null,p.cat,p.dim].filter(Boolean).join(' · ')}</div>` : ''}
       </div>
       <div class="ac-item-price">${fmtBRL(p.preco)}</div>
     </div>`).join('');
@@ -1386,6 +1503,7 @@ function selectProd(itemId, prodId) {
   const prod = produtos.find(p=>p.id==prodId); if(!prod) return;
   item.prodId = prodId;
   item.searchText = prod.nome;
+  item.codigoInput = prod.codigo ? String(prod.codigo) : '';
   item.desc = prod.nome + (prod.dim ? '\nDimensões: '+prod.dim : '') + (prod.obs ? '\n'+prod.obs : '');
   item.preco = prod.preco;
   item.foto = prod.foto || '';
@@ -1398,6 +1516,7 @@ function selectProd(itemId, prodId) {
   } else {
     item.conjComponents = [];
   }
+  const codEl = document.getElementById('cod-'+itemId); if(codEl) codEl.value = item.codigoInput;
   const inp = document.getElementById('search-'+itemId); if(inp) inp.value = prod.nome;
   const descEl = document.getElementById('desc-'+itemId); if(descEl) descEl.value = item.desc;
   const precoEl = document.getElementById('preco-'+itemId); if(precoEl) precoEl.value = item.preco;
@@ -1911,18 +2030,23 @@ function fmtDate(iso) { if(!iso) return '—'; const [y,m,d]=iso.split('-'); ret
 
   if (!produtos.length) {
     produtos = [
-      {id:1,nome:'Fogão a Lenha Industrial',dim:'70x50cm — Inox 430',preco:1800,cat:'Fogão',obs:'',foto:''},
-      {id:2,nome:'Fogão a Lenha Residencial',dim:'60x40cm — Inox 430',preco:1400,cat:'Fogão',obs:'',foto:''},
-      {id:3,nome:'Chaminé 3m Galvanizada Preta',dim:'Ø150mm — 3 metros',preco:450,cat:'Chaminé',obs:'Inclui chapéu chinês',foto:''},
-      {id:4,nome:'Churrasqueira de Embutir',dim:'80x50cm — Inox 304',preco:2200,cat:'Churrasqueira',obs:'',foto:''},
+      {id:1,nome:'Fogão a Lenha Industrial',dim:'70x50cm — Inox 430',preco:1800,cat:'Fogão',obs:'',foto:'',codigo:1},
+      {id:2,nome:'Fogão a Lenha Residencial',dim:'60x40cm — Inox 430',preco:1400,cat:'Fogão',obs:'',foto:'',codigo:2},
+      {id:3,nome:'Chaminé 3m Galvanizada Preta',dim:'Ø150mm — 3 metros',preco:450,cat:'Chaminé',obs:'Inclui chapéu chinês',foto:'',codigo:3},
+      {id:4,nome:'Churrasqueira de Embutir',dim:'80x50cm — Inox 304',preco:2200,cat:'Churrasqueira',obs:'',foto:'',codigo:4},
     ];
     await save();
+  } else {
+    // Migração: atribui código sequencial a produtos que ainda não têm
+    let maxCod = Math.max(0, ...produtos.map(p=>parseInt(p.codigo)||0));
+    let precisaSalvar = false;
+    produtos.forEach(p => { if(!p.codigo){ maxCod++; p.codigo=maxCod; precisaSalvar=true; } });
+    if(precisaSalvar) await save();
   }
 
   renderProdutos(); updateBadge();
+  populateCatSelect();
   items = [{id:Date.now(),prodId:'',desc:'',preco:0}];
-
-  // Init pedidos
   renderListaPedidos(); updateBadgePedidos();
   itemsPedido = [{id:Date.now()+1,prodId:'',desc:'',preco:0}];
   renderItemsPedido();
@@ -2143,6 +2267,15 @@ function renderItemsPedido() {
   c.innerHTML = itemsPedido.map((item, idx) => `
     <div class="item-row">
       <div>
+        <label class="form-label">Código</label>
+        <input class="form-input" id="pd-cod-${idx}" placeholder="Cód..." autocomplete="off"
+          value="${item.codigoInput||''}"
+          oninput="onCodInputPd(${idx},this.value)"
+          onblur="buscarPorCodigoPd(${idx})"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();buscarPorCodigoPd(${idx});}"
+          title="Digite o código e Tab ou Enter para buscar"/>
+      </div>
+      <div>
         <label class="form-label">Buscar Produto</label>
         <div class="ac-wrap">
           <input class="form-input" id="pd-search-${idx}" placeholder="Digite o nome do produto..." autocomplete="off"
@@ -2171,6 +2304,17 @@ function addItemPedido() {
   itemsPedido.push({id:Date.now(),prodId:'',desc:'',preco:0});
   renderItemsPedido();
 }
+function onCodInputPd(idx, val) {
+  if(itemsPedido[idx]) itemsPedido[idx].codigoInput = val;
+}
+function buscarPorCodigoPd(idx) {
+  const item=itemsPedido[idx]; if(!item) return;
+  const cod=(item.codigoInput||'').trim();
+  if(!cod) return;
+  const prod=produtos.find(p=>String(p.codigo||'')===cod);
+  if(!prod) { const el=document.getElementById('pd-cod-'+idx); if(el){el.style.borderColor='#e74c3c';setTimeout(()=>{el.style.borderColor='';},1500);} return; }
+  selectProdPd(idx, prod.id);
+}
 function removeItemPd(idx) {
   itemsPedido.splice(idx, 1);
   renderItemsPedido(); updatePreviewPd();
@@ -2185,7 +2329,7 @@ function openDropdownPd(idx) {
     <div class="ac-item" onmousedown="selectProdPd(${idx},${p.id})">
       <div class="ac-item-info">
         <div class="ac-item-name">${p.nome}</div>
-        ${p.dim||p.cat?`<div class="ac-item-sub">${[p.cat,p.dim].filter(Boolean).join(' · ')}</div>`:''}
+        ${p.dim||p.cat||p.codigo?`<div class="ac-item-sub">${[p.codigo?'Cód: '+p.codigo:null,p.cat,p.dim].filter(Boolean).join(' · ')}</div>`:''}
       </div>
       <div class="ac-item-price">${fmtBRL(p.preco)}</div>
     </div>`).join('');
@@ -2201,6 +2345,7 @@ function selectProdPd(idx, prodId) {
   const item=itemsPedido[idx]; if(!item) return;
   const prod=produtos.find(p=>p.id==prodId); if(!prod) return;
   item.prodId=prodId; item.searchText=prod.nome;
+  item.codigoInput = prod.codigo ? String(prod.codigo) : '';
   item.desc=prod.nome+(prod.dim?'\nDimensões: '+prod.dim:'')+(prod.obs?'\n'+prod.obs:'');
   item.preco=prod.preco; item.foto=prod.foto||'';
   if (prod.tipoProd === 'conjunto' && prod.componentes && prod.componentes.length) {
@@ -2211,6 +2356,7 @@ function selectProdPd(idx, prodId) {
   } else {
     item.conjComponents = [];
   }
+  const codEl=document.getElementById('pd-cod-'+idx); if(codEl) codEl.value = item.codigoInput;
   renderItemsPedido();
   updatePreviewPd();
 }
