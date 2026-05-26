@@ -799,6 +799,46 @@ function comprimirFoto(base64, maxKB = 150, maxPx = 600) {
   });
 }
 
+// ── FOTO DE PROJETO: PNG sem perdas (ideal p/ desenhos técnicos) ──
+function comprimirFotoProjeto(base64, maxKB = 900, maxPx = 2400) {
+  return new Promise(resolve => {
+    if (!base64 || !base64.startsWith('data:')) { resolve(base64); return; }
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      if (w > maxPx || h > maxPx) {
+        if (w > h) { h = Math.round(h * maxPx / w); w = maxPx; }
+        else       { w = Math.round(w * maxPx / h); h = maxPx; }
+      }
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      // Tenta PNG (sem perdas — melhor para desenhos técnicos com linhas e texto)
+      let result = canvas.toDataURL('image/png');
+      if (result.length <= maxKB * 1024 * 1.37) { resolve(result); return; }
+      // PNG muito grande → fallback JPEG alta qualidade em tamanho menor
+      let wj = w, hj = h;
+      while (result.length > maxKB * 1024 * 1.37 && wj > 800) {
+        wj = Math.round(wj * 0.8); hj = Math.round(hj * 0.8);
+        const c2 = document.createElement('canvas');
+        c2.width = wj; c2.height = hj;
+        c2.getContext('2d').drawImage(img, 0, 0, wj, hj);
+        result = c2.toDataURL('image/png');
+      }
+      // Se ainda grande, usa JPEG 0.95
+      if (result.length > maxKB * 1024 * 1.37) {
+        result = canvas.toDataURL('image/jpeg', 0.95);
+      }
+      resolve(result);
+    };
+    img.onerror = () => resolve(base64);
+    img.src = base64;
+  });
+}
+
 // ── SAVE ─────────────────────────────────────────────────────────
 async function save() {
   setStatus('💾 Salvando…');
@@ -972,7 +1012,7 @@ async function onFotoProjetoChange(e) {
     if (file.size > 2 * 1024 * 1024) { alert('Foto muito grande. Use uma imagem até 2MB.'); continue; }
     const reader = new FileReader();
     const base64 = await new Promise(res => { reader.onload = ev => res(ev.target.result); reader.readAsDataURL(file); });
-    const compressed = await comprimirFoto(base64, 800, 1800);
+    const compressed = await comprimirFotoProjeto(base64);
     currentFotosProjetoBase64.push(compressed);
     renderProjetoThumbs();
   }
@@ -1772,11 +1812,11 @@ function getHTMLOrc(o) {
   const todasFotosOrc = projetoItens.flatMap(it => it.fotos.map(src => ({ src, nome: it.nome })));
   const totalFotosOrc = todasFotosOrc.length;
   const projetoPrintHtml = totalFotosOrc ? todasFotosOrc.map((foto, idx) => `
-    <div class="projeto-print-page" style="page-break-before:always;margin:0;padding:0;width:100%;box-sizing:border-box">
+    <div class="projeto-print-page" style="page-break-before:always;padding-top:8mm;width:100%;box-sizing:border-box">
       <div style="background:#003366;color:#fff;padding:8px 16px;font-size:13pt;font-weight:700;letter-spacing:.5px;text-align:center">
         PROJETO — ORÇAMENTO Nº ${String(o.num).padStart(3,'0')} — Página ${idx+1} de ${totalFotosOrc}
       </div>
-      <div style="display:table;width:100%;border:2px solid #003366;border-top:none;margin-bottom:6px">
+      <div style="display:table;width:100%;border:2px solid #003366;border-top:none;margin-bottom:8px">
         <div style="display:table-cell;padding:8px 14px;vertical-align:middle">
           <div style="font-size:14pt;font-weight:700;color:#003366">AÇO NAVAL</div>
           <div style="font-size:10pt;color:#555">www.aconaval.com</div>
@@ -1785,8 +1825,8 @@ function getHTMLOrc(o) {
           <div style="font-size:11pt;font-weight:600;color:#111">${foto.nome}</div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:center;width:100%;height:210mm">
-        <img src="${foto.src}" style="max-width:100%;max-height:210mm;width:100%;object-fit:contain;display:block"/>
+      <div style="width:100%">
+        <img src="${foto.src}" style="width:100%;max-height:195mm;object-fit:contain;display:block;image-rendering:auto"/>
       </div>
     </div>`).join('') : '';
 
@@ -1798,6 +1838,7 @@ function getHTMLOrc(o) {
   @page { margin: 15mm 18mm; }
   @media print { .no-print { display:none!important } }
   * { box-sizing:border-box; margin:0; padding:0 }
+  .projeto-print-page { padding-top:8mm!important }
   body { font-family: Arial, Helvetica, sans-serif; font-size: 12pt; color: #111; background:#fff }
 
   .print-btn {
@@ -1871,7 +1912,7 @@ function getHTMLOrc(o) {
   .info-cell { display:table-cell; border-radius:3px; padding:8px 10px; vertical-align:top; width:33% }
   .info-cell-label { font-size:12pt; text-transform:uppercase; letter-spacing:.5px; font-weight:700; margin-bottom:3px }
   .info-cell-val { font-size:12pt; font-weight:700; color:#111 }
-  img { max-width:100%; -webkit-print-color-adjust:exact; print-color-adjust:exact; image-rendering:-webkit-optimize-contrast; image-rendering:crisp-edges }
+  img { max-width:100%; -webkit-print-color-adjust:exact; print-color-adjust:exact; image-rendering:auto }
   .footer { margin-top:20px; text-align:center; font-size:12pt; color:#bbb; border-top:1px solid #eee; padding-top:10px }
   @media screen { .projeto-print-page { display:none !important } }
   @media print  { .projeto-inline    { display:none !important } }
@@ -2896,12 +2937,11 @@ function getHTMLPed(p) {
   const todasFotosPed = projetoItensPed.flatMap(it => it.fotos.map(src => ({ src, nome: it.nome })));
   const totalFotosPed = todasFotosPed.length;
   const projetoPrintPedHtml = totalFotosPed ? todasFotosPed.map((foto, idx) => `
-    <div class="projeto-print-page" style="page-break-before:always;margin:0;padding:0;width:100%;box-sizing:border-box">
-      <!-- Cabeçalho igual à ordem de produção -->
+    <div class="projeto-print-page" style="page-break-before:always;padding-top:8mm;width:100%;box-sizing:border-box">
       <div class="top-banner" style="text-align:center;margin-bottom:0;border-radius:0">
         PROJETO — PEDIDO Nº ${String(p.num).padStart(3,'0')}${[p.cidade,p.estado].filter(Boolean).length?' — '+[p.cidade.toUpperCase(),p.estado].filter(Boolean).join(' — '):''} — Página ${idx+1} de ${totalFotosPed}
       </div>
-      <div class="header" style="margin-bottom:6px">
+      <div class="header" style="margin-bottom:8px">
         <div class="header-left">
           <div style="display:flex;align-items:center;gap:10px">
             ${logoSrc?`<img src="${logoSrc}" style="height:40px;width:auto;mix-blend-mode:multiply"/>`:''}
@@ -2915,9 +2955,28 @@ function getHTMLPed(p) {
           <div class="doc-num" style="font-size:11pt">${foto.nome}</div>
         </div>
       </div>
-      <!-- Foto ocupando o restante da página -->
-      <div style="flex:1;display:flex;align-items:center;justify-content:center;width:100%;height:210mm">
-        <img src="${foto.src}" style="max-width:100%;max-height:210mm;width:100%;object-fit:contain;display:block"/>
+      <div style="width:100%">
+        <img src="${foto.src}" style="width:100%;max-height:190mm;object-fit:contain;display:block;image-rendering:auto"/>
+      </div>
+      <div class="sign-grid" style="display:table;width:100%;margin-top:8px">
+        <div class="sign-cell">
+          <div style="height:36px"></div>
+          <div class="sign-line"></div>
+          <div class="sign-name">Paulo Ricardo Almeida</div>
+        </div>
+        <div class="sign-cell">
+          <div style="height:36px"></div>
+          <div class="sign-line"></div>
+          <div class="sign-name">Herondina Pittan</div>
+        </div>
+        <div class="sign-cell">
+          ${p.assinatura
+            ? `<div style="height:36px;display:flex;align-items:center;justify-content:center;overflow:hidden"><img src="${p.assinatura.imagem}" style="height:34px;width:140px;object-fit:contain;image-rendering:auto"/></div>`
+            : `<div style="height:36px"></div>`}
+          <div class="sign-line"></div>
+          <div class="sign-name">${p.assinatura ? p.assinatura.nome : '<span style="color:#ccc">Assinatura do Cliente</span>'}</div>
+          ${p.assinatura ? `<div style="font-size:9pt;color:#888;margin-top:3px">Cliente — ${new Date(p.assinatura.data).toLocaleString('pt-BR')}</div>` : ''}
+        </div>
       </div>
     </div>`).join('') : '';
   return `<!DOCTYPE html>
@@ -2927,6 +2986,7 @@ function getHTMLPed(p) {
   @page{margin:15mm 18mm;size:A4}
   @media print{.no-print{display:none!important}}
   *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+  .projeto-print-page{padding-top:8mm!important}
   body{font-family:Arial,Helvetica,sans-serif;font-size:12pt;color:#111;background:#fff}
   .print-btn{position:fixed;top:16px;right:16px;background:#003366;color:#fff;border:none;padding:9px 20px;border-radius:6px;font-size:12pt;font-weight:600;cursor:pointer;z-index:99}
   .print-btn:hover{background:#0C447C}
@@ -2971,7 +3031,7 @@ function getHTMLPed(p) {
   .sign-name{font-size:11pt;font-weight:700;color:#003366}
   @media screen { .projeto-print-page { display:none !important } }
   @media print  { .projeto-inline    { display:none !important } }
-  img{max-width:100%;-webkit-print-color-adjust:exact;print-color-adjust:exact;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges}
+  img{max-width:100%;-webkit-print-color-adjust:exact;print-color-adjust:exact;image-rendering:auto}
 </style>
 </head><body>
 <button class="print-btn no-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
