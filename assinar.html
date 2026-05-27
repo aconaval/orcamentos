@@ -214,6 +214,7 @@
     <div class="card-body">
       <div class="total-box">
         <div class="total-row"><span>Subtotal</span><span id="p-subtotal">—</span></div>
+        <div class="total-row" id="p-desc-row" style="display:none;color:#1e7a47"><span>Desconto</span><span id="p-desconto">—</span></div>
         <div class="total-row main"><span>Total do Pedido</span><span id="p-total">—</span></div>
         <div class="total-avista" id="p-avista">—</div>
       </div>
@@ -423,15 +424,22 @@ function renderPedido(p) {
   }).join('');
 
   // Financeiro
-  const sub = p.subtotal||0;
-  const avista = sub*0.90;
-  const parc = Math.ceil(sub/12*100)/100;
+  const sub   = p.subtotal || 0;
+  const total = p.total || sub;
+  const desc  = p.desconto || 0;
+  const avista = total * 0.90;
+  const parc   = Math.ceil(total / 12 * 100) / 100;
   document.getElementById('p-subtotal').textContent = fmtBRL(sub);
-  document.getElementById('p-total').textContent = fmtBRL(sub);
-  document.getElementById('p-avista').textContent = `À vista com 10% desc: ${fmtBRL(avista)}`;
-  document.getElementById('p-cartao').textContent = fmtBRL(sub);
-  document.getElementById('p-parcela').textContent = `Até 12x de ${fmtBRL(parc)}`;
-  document.getElementById('p-pix').textContent = fmtBRL(avista);
+  document.getElementById('p-total').textContent    = fmtBRL(total);
+  document.getElementById('p-avista').textContent   = `À vista com 10% desc: ${fmtBRL(avista)}`;
+  document.getElementById('p-cartao').textContent   = fmtBRL(total);
+  document.getElementById('p-parcela').textContent  = `Até 12x de ${fmtBRL(parc)}`;
+  document.getElementById('p-pix').textContent      = fmtBRL(avista);
+  // Mostra linha de desconto se houver
+  const discRow = document.getElementById('p-desc-row');
+  if (discRow) discRow.style.display = desc > 0 ? 'flex' : 'none';
+  const discEl = document.getElementById('p-desconto');
+  if (discEl) discEl.textContent = '− ' + fmtBRL(desc);
 
   if (p.prazo) {
     document.getElementById('p-prazo').textContent = p.prazo;
@@ -537,7 +545,7 @@ async function enviarParaGestao(pedido, nomeAssinante) {
     const mes   = MS_NAMES[agora.getMonth()];
     const ano   = agora.getFullYear();
     const gid   = Date.now();
-    const val   = parseFloat(((pedido.subtotal || 0) * 0.90).toFixed(2));
+    const val   = parseFloat(((pedido.total || pedido.subtotal || 0) * 0.90).toFixed(2));
 
     // Cria uma entrada por vendedor (todos por padrão)
     const novosPedidos = vs.map((v, i) => ({
@@ -608,7 +616,7 @@ async function confirmarPedido() {
     document.getElementById('suc-detail').innerHTML = `
       <strong>✍️ Assinado por:</strong> ${nome}<br>
       <strong>📅 Data/Hora:</strong> ${new Date().toLocaleString('pt-BR')}<br>
-      <strong>📦 Total:</strong> ${fmtBRL(pedidoAtual.subtotal)}
+      <strong>📦 Total:</strong> ${fmtBRL(pedidoAtual.total || pedidoAtual.subtotal)}
     `;
     showScreen('sucesso');
 
