@@ -243,6 +243,12 @@
     </div>
   </div>
 
+  <!-- FOTOS DO PROJETO -->
+  <div class="card" id="projeto-wrap" style="display:none">
+    <div class="card-header">📐 Fotos do Projeto</div>
+    <div class="card-body" id="projeto-body"></div>
+  </div>
+
   <!-- SEÇÃO DE ASSINATURA -->
   <div class="sign-section" id="sign-section">
     <div class="sign-header">✍️ Confirmar e Assinar Pedido</div>
@@ -325,6 +331,7 @@ let pedidoAtual = null;
 const prodFotos = {}; // mapa prodId -> foto carregado do acn_produtos
 const prodCats  = {}; // mapa prodId -> categoria carregada do acn_produtos
 const prodDados = {}; // mapa prodId -> { tipoProd, componentes, nome }
+const prodFotosProj = {}; // mapa prodId -> fotosprojeto[]
 
 // ── CARREGA PEDIDO ────────────────────────────────────────────────
 async function carregarPedido() {
@@ -342,7 +349,7 @@ async function carregarPedido() {
         ids.map(pid => db.collection('acn_produtos').doc(String(pid)).get())
       );
       prodSnaps.forEach(s => {
-        if (s.exists) { const d = s.data(); if (d.id && d.foto) prodFotos[String(d.id)] = d.foto; if (d.id && d.cat) prodCats[String(d.id)] = d.cat; if (d.id) prodDados[String(d.id)] = { tipoProd: d.tipoProd, componentes: d.componentes||[], nome: d.nome }; }
+        if (s.exists) { const d = s.data(); if (d.id && d.foto) prodFotos[String(d.id)] = d.foto; if (d.id && d.cat) prodCats[String(d.id)] = d.cat; if (d.id) prodDados[String(d.id)] = { tipoProd: d.tipoProd, componentes: d.componentes||[], nome: d.nome }; if (d.id && d.fotosprojeto && d.fotosprojeto.length) prodFotosProj[String(d.id)] = d.fotosprojeto; }
       });
     }
 
@@ -429,6 +436,25 @@ function renderPedido(p) {
   if (p.prazo) {
     document.getElementById('p-prazo').textContent = p.prazo;
     document.getElementById('p-prazo-box').style.display = 'flex';
+  }
+
+  // Fotos do Projeto
+  let projetoHtml = '';
+  (p.items||[]).forEach(item => {
+    const pfotos = (item.prodId && prodFotosProj[String(item.prodId)]) || [];
+    if (pfotos.length) {
+      const pnome = (item.desc||'').split('\n')[0] || '';
+      projetoHtml += '<div style="margin-bottom:18px">';
+      projetoHtml += '<div style="font-weight:700;font-size:13px;color:#003366;margin-bottom:8px">📦 ' + pnome + '</div>';
+      pfotos.forEach(src => {
+        projetoHtml += '<img src="' + src + '" style="width:100%;display:block;margin-bottom:10px;border-radius:6px;image-rendering:auto"/>';
+      });
+      projetoHtml += '</div>';
+    }
+  });
+  if (projetoHtml) {
+    document.getElementById('projeto-body').innerHTML = projetoHtml;
+    document.getElementById('projeto-wrap').style.display = 'block';
   }
 
   // Já assinado?
