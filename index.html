@@ -2679,6 +2679,16 @@ function editarPedido(id) {
     restorePrazoEntrega(p.prazo || '');
     document.getElementById('pd-obs').value    = p.obs    || '';
     document.getElementById('pd-numero').value = p.num    || '';
+    // Restaura desconto
+    const rpPct = document.getElementById('pd-inp-desc-pct');
+    const rpVal = document.getElementById('pd-inp-desc-val');
+    if (rpPct) rpPct.value = '';
+    if (rpVal) rpVal.value = '';
+    if (p.desconto && p.subtotal) {
+      const pct = Math.round(p.desconto / p.subtotal * 1000) / 10;
+      if (Number.isInteger(pct * 10) && pct <= 100) { if(rpPct) rpPct.value = pct; }
+      else { if(rpVal) rpVal.value = p.desconto.toFixed(2); }
+    }
     // Preenche os itens
     itemsPedido = JSON.parse(JSON.stringify(p.items || [{id:Date.now(),prodId:'',desc:'',preco:0}]));
     itemsPedido.forEach(item => { if(!item.searchText) item.searchText = item.desc.split('\n')[0]; });
