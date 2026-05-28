@@ -590,7 +590,17 @@ async function confirmarPedido() {
   btn.disabled=true; btn.innerHTML='⏳ Salvando...'; statusEl.textContent='';
 
   try {
-    const signImg = canvas.toDataURL('image/png');
+    // Comprime a assinatura: converte para JPEG na resolução de exibição real
+    // (evita PNG gigante em telas Retina/3x que estoura o limite de 1MB do Firestore)
+    const dpr = window.devicePixelRatio || 1;
+    const tmpCanvas = document.createElement('canvas');
+    tmpCanvas.width  = Math.round(canvas.width  / dpr);
+    tmpCanvas.height = Math.round(canvas.height / dpr);
+    const tmpCtx = tmpCanvas.getContext('2d');
+    tmpCtx.fillStyle = '#ffffff';
+    tmpCtx.fillRect(0, 0, tmpCanvas.width, tmpCanvas.height);
+    tmpCtx.drawImage(canvas, 0, 0, tmpCanvas.width, tmpCanvas.height);
+    const signImg = tmpCanvas.toDataURL('image/jpeg', 0.65);
     const snap = await db.collection('acn').doc('pedidos').get();
     if (!snap.exists) throw new Error('Pedido não encontrado');
 
