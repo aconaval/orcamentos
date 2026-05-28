@@ -1813,20 +1813,22 @@ function getHTMLOrc(o) {
   const totalFotosOrc = todasFotosOrc.length;
   const projetoPrintHtml = totalFotosOrc ? todasFotosOrc.map((foto, idx) => `
     <div class="projeto-print-page" style="page-break-before:always;padding-top:8mm;width:100%;box-sizing:border-box">
-      <div style="background:#003366;color:#fff;padding:8px 16px;font-size:13pt;font-weight:700;letter-spacing:.5px;text-align:center">
-        PROJETO — ORÇAMENTO Nº ${String(o.num).padStart(3,'0')} — Página ${idx+1} de ${totalFotosOrc}
-      </div>
-      <div style="display:table;width:100%;border:2px solid #003366;border-top:none;margin-bottom:8px">
-        <div style="display:table-cell;padding:8px 14px;vertical-align:middle">
-          <div style="font-size:14pt;font-weight:700;color:#003366">AÇO NAVAL</div>
-          <div style="font-size:10pt;color:#555">www.aconaval.com</div>
+      <div class="doc">
+        <div style="background:#003366;color:#fff;padding:8px 16px;font-size:13pt;font-weight:700;letter-spacing:.5px;text-align:center">
+          PROJETO — ORÇAMENTO Nº ${String(o.num).padStart(3,'0')} — Página ${idx+1} de ${totalFotosOrc}
         </div>
-        <div style="display:table-cell;padding:8px 14px;text-align:right;vertical-align:middle;border-left:1px solid #ccc;width:200px">
-          <div style="font-size:11pt;font-weight:600;color:#111">${foto.nome}</div>
+        <div style="display:table;width:100%;border:2px solid #003366;border-top:none;margin-bottom:0">
+          <div style="display:table-cell;padding:8px 14px;vertical-align:middle">
+            <div style="font-size:14pt;font-weight:700;color:#003366">AÇO NAVAL</div>
+            <div style="font-size:10pt;color:#555">www.aconaval.com</div>
+          </div>
+          <div style="display:table-cell;padding:8px 14px;text-align:right;vertical-align:middle;border-left:1px solid #ccc;width:200px">
+            <div style="font-size:11pt;font-weight:600;color:#111">${foto.nome}</div>
+          </div>
         </div>
       </div>
       <div style="width:100%">
-        <img src="${foto.src}" style="width:100%;max-height:195mm;object-fit:contain;display:block;image-rendering:auto"/>
+        <img src="${foto.src}" style="width:100%;max-height:200mm;object-fit:contain;display:block;image-rendering:auto"/>
       </div>
     </div>`).join('') : '';
 
@@ -2872,30 +2874,12 @@ function getHTMLPed(p) {
     const nome = `<strong style="text-transform:uppercase">${lines[0]}</strong>`;
     const resto = lines.slice(1).join('<br>');
     const descHtmlB = nome + (resto ? '<br><span style="font-weight:normal">' + resto + '</span>' : '');
-    // Detalhamento do conjunto no pedido
-    const prodRefPd = item.prodId ? produtos.find(x => x.id == item.prodId) : null;
-    const conjHtmlPd = (prodRefPd && prodRefPd.tipoProd==='conjunto' && prodRefPd.componentes && prodRefPd.componentes.length)
-      ? `<div style="margin-top:7px;border-top:1px dashed #ccc;padding-top:6px">
-          <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:#888;font-weight:700;margin-bottom:4px">Composição do conjunto</div>
-          <table style="width:100%;border-collapse:collapse;font-size:.78rem">
-            ${prodRefPd.componentes.map(c=>{
-              const cp=produtos.find(x=>x.id===c.prodId);
-              if(!cp) return '';
-              return `<tr>
-                <td style="padding:1px 0;color:#555;font-size:.72rem">${cp.nome}</td>
-                <td style="text-align:right;color:#185FA5;font-weight:600;white-space:nowrap;padding-left:12px;font-size:.72rem">${fmtBRL(cp.preco)}</td>
-              </tr>`;
-            }).join('')}
-          </table>
-        </div>`
-      : '';
-
     return `<tr>
       <td class="idx" style="vertical-align:top;padding-top:10px">${String(idx+1).padStart(2,'0')}</td>
       <td>
         <div style="display:table;width:100%">
           ${item.foto?`<div style="display:table-cell;width:90px;vertical-align:top;padding-right:12px"><img src="${item.foto}" style="width:80px;height:80px;object-fit:contain;background:#fff"/></div>`:''}
-          <div style="display:table-cell;vertical-align:top">${descHtmlB}${conjHtmlPd}</div>
+          <div style="display:table-cell;vertical-align:top">${descHtmlB}</div>
         </div>
       </td>
       <td class="val" style="vertical-align:top;padding-top:10px">${item.preco>0?fmtBRL(item.preco):'—'}</td>
@@ -2945,44 +2929,48 @@ function getHTMLPed(p) {
   const totalFotosPed = todasFotosPed.length;
   const projetoPrintPedHtml = totalFotosPed ? todasFotosPed.map((foto, idx) => `
     <div class="projeto-print-page" style="page-break-before:always;padding-top:8mm;width:100%;box-sizing:border-box">
-      <div class="top-banner" style="text-align:center;margin-bottom:0;border-radius:0">
-        PROJETO — PEDIDO Nº ${String(p.num).padStart(3,'0')}${[p.cidade,p.estado].filter(Boolean).length?' — '+[p.cidade.toUpperCase(),p.estado].filter(Boolean).join(' — '):''} — Página ${idx+1} de ${totalFotosPed}
-      </div>
-      <div class="header" style="margin-bottom:8px">
-        <div class="header-left">
-          <div style="display:flex;align-items:center;gap:10px">
-            ${logoSrc?`<img src="${logoSrc}" style="height:40px;width:auto;mix-blend-mode:multiply"/>`:''}
-            <div>
-              <div class="company-name" style="font-size:13pt">AÇO NAVAL</div>
-              <div class="company-sub" style="font-size:10pt">www.aconaval.com</div>
+      <div class="doc">
+        <div class="top-banner" style="text-align:center;margin-bottom:0;border-radius:0">
+          PROJETO — PEDIDO Nº ${String(p.num).padStart(3,'0')}${[p.cidade,p.estado].filter(Boolean).length?' — '+[p.cidade.toUpperCase(),p.estado].filter(Boolean).join(' — '):''} — Página ${idx+1} de ${totalFotosPed}
+        </div>
+        <div class="header" style="margin-bottom:0">
+          <div class="header-left">
+            <div style="display:flex;align-items:center;gap:10px">
+              ${logoSrc?`<img src="${logoSrc}" style="height:40px;width:auto;mix-blend-mode:multiply"/>`:''}
+              <div>
+                <div class="company-name" style="font-size:13pt">AÇO NAVAL</div>
+                <div class="company-sub" style="font-size:10pt">www.aconaval.com</div>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="header-right" style="width:160px">
-          <div class="doc-num" style="font-size:11pt">${foto.nome}</div>
+          <div class="header-right" style="width:160px">
+            <div class="doc-num" style="font-size:11pt">${foto.nome}</div>
+          </div>
         </div>
       </div>
       <div style="width:100%">
-        <img src="${foto.src}" style="width:100%;max-height:190mm;object-fit:contain;display:block;image-rendering:auto"/>
+        <img src="${foto.src}" style="width:100%;max-height:200mm;object-fit:contain;display:block;image-rendering:auto"/>
       </div>
-      <div class="sign-grid" style="display:table;width:100%;margin-top:8px">
-        <div class="sign-cell">
-          <div style="height:36px"></div>
-          <div class="sign-line"></div>
-          <div class="sign-name">Paulo Ricardo Almeida</div>
-        </div>
-        <div class="sign-cell">
-          <div style="height:36px"></div>
-          <div class="sign-line"></div>
-          <div class="sign-name">Herondina Pittan</div>
-        </div>
-        <div class="sign-cell">
-          ${p.assinatura
-            ? `<div style="height:36px;display:flex;align-items:center;justify-content:center;overflow:hidden"><img src="${p.assinatura.imagem}" style="height:34px;width:140px;object-fit:contain;image-rendering:auto"/></div>`
-            : `<div style="height:36px"></div>`}
-          <div class="sign-line"></div>
-          <div class="sign-name">${p.assinatura ? p.assinatura.nome : '<span style="color:#ccc">Assinatura do Cliente</span>'}</div>
-          ${p.assinatura ? `<div style="font-size:9pt;color:#888;margin-top:3px">Cliente — ${new Date(p.assinatura.data).toLocaleString('pt-BR')}</div>` : ''}
+      <div class="doc">
+        <div class="sign-grid" style="display:table;width:100%;margin-top:8px">
+          <div class="sign-cell">
+            <div style="height:36px"></div>
+            <div class="sign-line"></div>
+            <div class="sign-name">Paulo Ricardo Almeida</div>
+          </div>
+          <div class="sign-cell">
+            <div style="height:36px"></div>
+            <div class="sign-line"></div>
+            <div class="sign-name">Herondina Pittan</div>
+          </div>
+          <div class="sign-cell">
+            ${p.assinatura
+              ? `<div style="height:36px;display:flex;align-items:center;justify-content:center;overflow:hidden"><img src="${p.assinatura.imagem}" style="height:34px;width:140px;object-fit:contain;image-rendering:auto"/></div>`
+              : `<div style="height:36px"></div>`}
+            <div class="sign-line"></div>
+            <div class="sign-name">${p.assinatura ? p.assinatura.nome : '<span style="color:#ccc">Assinatura do Cliente</span>'}</div>
+            ${p.assinatura ? `<div style="font-size:9pt;color:#888;margin-top:3px">Cliente — ${new Date(p.assinatura.data).toLocaleString('pt-BR')}</div>` : ''}
+          </div>
         </div>
       </div>
     </div>`).join('') : '';
