@@ -657,6 +657,7 @@ tbody tr:hover{background:#fafbfc}
         <textarea class="form-textarea" id="pd-obs" placeholder="Observação extra (opcional)"></textarea>
       </div>
       <button class="btn btn-success" style="width:100%;padding:10px;font-size:14px;font-weight:600" onclick="gerarPedido()">📦 Gerar Pedido</button>
+      <div id="status-msg-pedido" style="display:none;margin-top:8px;text-align:center;font-size:13px;font-weight:600;padding:8px 12px;border-radius:6px;background:#f5f5f5"></div>
     </div>
   </div>
 </div>
@@ -2214,16 +2215,41 @@ function converterEmPedido() {
 
   // Preenche o formulário de pedido com os dados da solicitação
   setTimeout(() => {
-    document.getElementById('pd-nome').value = s.nome||'';
-    document.getElementById('pd-doc').value  = s.cpf||'';
-    document.getElementById('pd-fone').value = s.fone||'';
-    document.getElementById('pd-rua').value  = s.rua||'';
-    document.getElementById('pd-num').value  = s.numEnd||'';
+    document.getElementById('pd-nome').value   = s.nome||'';
+    document.getElementById('pd-doc').value    = s.cpf||'';
+    document.getElementById('pd-fone').value   = s.fone||'';
+    document.getElementById('pd-rua').value    = s.rua||'';
+    document.getElementById('pd-num').value    = s.numEnd||'';
     document.getElementById('pd-bairro').value = s.bairro||'';
-    document.getElementById('pd-cep').value  = s.cep||'';
+    document.getElementById('pd-cep').value    = s.cep||'';
     document.getElementById('pd-cidade').value = s.cidade||'';
     document.getElementById('pd-estado').value = s.estado||'';
-    document.getElementById('pd-obs').value  = s.obs||'';
+    document.getElementById('pd-obs').value    = s.obs||'';
+
+    // Se a solicitação veio de um orçamento, pré-carrega os itens
+    if (s.orcId) {
+      const orc = orcamentos.find(x => String(x.id) === String(s.orcId));
+      if (orc && orc.items && orc.items.length) {
+        itemsPedido = orc.items.map(it => ({
+          id:     Date.now() + Math.random(),
+          prodId: it.prodId || '',
+          desc:   it.desc   || '',
+          preco:  it.preco  || 0,
+          foto:   it.foto   || '',
+        }));
+        renderItemsPedido();
+        updatePreviewPd();
+
+        // Avisa que os itens vieram do orçamento
+        const orcNum = String(orc.num).padStart(3,'0');
+        const container = document.getElementById('pd-items-container');
+        const banner = document.createElement('div');
+        banner.style.cssText = 'background:#e8f4e8;border:1px solid #a8d5a8;border-radius:6px;padding:8px 12px;font-size:12px;color:#2a6b3a;margin-bottom:10px';
+        banner.innerHTML = '\u2705 <strong>' + orc.items.length + ' item(ns) do Or\u00e7amento #' + orcNum + '</strong> carregados automaticamente. Voc\u00ea pode editar antes de gerar o pedido.';
+        container.parentNode.insertBefore(banner, container);
+      }
+    }
+
     // Marca solicitação como convertida
     marcarSolicConvertida(s.id);
   }, 100);
@@ -2755,9 +2781,26 @@ function gerarPedido() {
 
 // ── SAVE/LOAD PEDIDOS ────────────────────────────────────────────
 async function savePedidos() {
+  const statusEl = document.getElementById('status-msg-pedido');
+  function setPS(msg, tipo) {
+    if (!statusEl) return;
+    statusEl.textContent = msg;
+    statusEl.style.color = tipo === 'erro' ? '#c0392b' : tipo === 'ok' ? '#1a7a44' : '#555';
+    statusEl.style.display = 'block';
+    if (tipo === 'ok') setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+  }
   try {
-    await db.collection('acn').doc('pedidos').set({lista: pedidos});
+    setPS('💾 Salvando pedido…');
+    // Remove fotos dos itens antes de salvar (evita estouro de 1MB no Firestore)
+    const pedidosSemFoto = pedidos.map(p => ({
+      ...p,
+      items: (p.items || []).map(it => { const i = {...it}; delete i.foto; return i; })
+    }));
+    await db.collection('acn').doc('pedidos').set({lista: pedidosSemFoto});
+    setPS('✅ Pedido salvo!', 'ok');
   } catch(e) {
+    console.error('Erro ao salvar pedido:', e);
+    setPS('❌ Erro ao salvar: ' + (e.code || e.message || String(e)), 'erro');
     localStorage.setItem('acn_pedidos', JSON.stringify(pedidos));
   }
 }
