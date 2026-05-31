@@ -656,6 +656,44 @@ tbody tr:hover{background:#fafbfc}
         <div style="font-size:13px;font-weight:700;color:#003366;margin-bottom:10px">Observação</div>
         <textarea class="form-textarea" id="pd-obs" placeholder="Observação extra (opcional)"></textarea>
       </div>
+      <div class="card" style="margin-bottom:12px">
+        <div style="font-size:13px;font-weight:700;color:#003366;margin-bottom:10px">💳 Condições de Pagamento</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label class="form-label">Cartão — parcelar em até</label>
+            <select class="form-input" id="pd-parcelas" oninput="updatePreviewPd()" style="font-weight:600;color:#003366">
+              <option value="12">12x sem juros</option>
+              <option value="11">11x sem juros</option>
+              <option value="10">10x sem juros</option>
+              <option value="9">9x sem juros</option>
+              <option value="8">8x sem juros</option>
+              <option value="7">7x sem juros</option>
+              <option value="6">6x sem juros</option>
+              <option value="5">5x sem juros</option>
+              <option value="4">4x sem juros</option>
+              <option value="3">3x sem juros</option>
+              <option value="2">2x sem juros</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">À vista — opção parcelada adicional</label>
+            <select class="form-input" id="pd-avista-parc" oninput="updatePreviewPd()">
+              <option value="0">Nenhuma (só desconto 10%)</option>
+              <option value="2">ou em 2x sem juros</option>
+              <option value="3">ou em 3x sem juros</option>
+              <option value="4">ou em 4x sem juros</option>
+              <option value="5">ou em 5x sem juros</option>
+              <option value="6">ou em 6x sem juros</option>
+              <option value="7">ou em 7x sem juros</option>
+              <option value="8">ou em 8x sem juros</option>
+              <option value="9">ou em 9x sem juros</option>
+              <option value="10">ou em 10x sem juros</option>
+              <option value="11">ou em 11x sem juros</option>
+              <option value="12">ou em 12x sem juros</option>
+            </select>
+          </div>
+        </div>
+      </div>
       <button class="btn btn-success" style="width:100%;padding:10px;font-size:14px;font-weight:600" onclick="gerarPedido()">📦 Gerar Pedido</button>
       <div id="status-msg-pedido" style="display:none;margin-top:8px;text-align:center;font-size:13px;font-weight:600;padding:8px 12px;border-radius:6px;background:#f5f5f5"></div>
     </div>
@@ -667,10 +705,11 @@ tbody tr:hover{background:#fafbfc}
   <div class="sec-header">
     <div class="sec-title">Pedidos <small>Histórico completo de pedidos</small></div>
   </div>
-  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
     <button id="filter-todos" class="btn btn-primary btn-sm" onclick="filtrarPedidos('todos')" style="border-radius:20px">Todos</button>
     <button id="filter-aguardando" class="btn btn-ghost btn-sm" onclick="filtrarPedidos('aguardando')" style="border-radius:20px;border-color:#ffcc80;color:#e65100">⏳ Aguardando</button>
     <button id="filter-assinado" class="btn btn-ghost btn-sm" onclick="filtrarPedidos('assinado')" style="border-radius:20px;border-color:#b8e0c7;color:#1a7a44">✅ Assinados</button>
+    <button class="btn btn-ghost btn-sm" onclick="verBackupLocal()" style="border-radius:20px;margin-left:auto;border-color:#aaa;color:#666">🗂️ Ver backup local</button>
   </div>
   <div id="lista-pedidos-container">
     <div class="empty"><div class="empty-icon">📦</div><p>Nenhum pedido gerado ainda.</p></div>
@@ -2533,6 +2572,8 @@ function resetPedidoForm(){
   const rpPct=document.getElementById('pd-inp-desc-pct'); if(rpPct) rpPct.value='';
   const rpVal=document.getElementById('pd-inp-desc-val'); if(rpVal) rpVal.value='';
   renderItemsPedido(); updatePreviewPd();
+  const parSelEl = document.getElementById('pd-parcelas'); if(parSelEl) parSelEl.value='12';
+  const aviParcEl = document.getElementById('pd-avista-parc'); if(aviParcEl) aviParcEl.value='0';
   // Reset botão e título
   const btn = document.querySelector('#page-novo-pedido .btn-success');
   if (btn) { btn.textContent = '📦 Gerar Pedido'; btn.style.background = ''; }
@@ -2563,7 +2604,9 @@ function buildMsgOrc(o) {
 
 function buildMsgPed(p) {
   const avista=(((p.total||p.subtotal)*.90)).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-  const parc=(Math.ceil((p.total||p.subtotal)/12*100)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  const _parc_n = p.parcelas||12;
+  const parc=(Math.ceil((p.total||p.subtotal)/_parc_n*100)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  const _avistaVal = (p.total||p.subtotal)*.90;
   const itens=p.items.map((it,i)=>`  ${String(i+1).padStart(2,'0')}. ${it.desc.split('\n')[0]}${it.preco>0?' — '+fmtBRL(it.preco):''}`).join('\n');
   const end=[p.rua,p.numEnd,p.bairro,[p.cidade,p.estado].filter(Boolean).join(' — ')].filter(Boolean).join(', ');
   return ['📦 *AÇO NAVAL* — Pedido Nº '+String(p.num).padStart(3,'0'),'',
@@ -2571,8 +2614,9 @@ function buildMsgPed(p) {
     '📅 Data: '+fmtDate(p.data), p.prazo?'⏰ Prazo: '+p.prazo:'','',
     '📋 *Itens:*',itens,'',
     '💰 *Total: '+fmtBRL(p.total||p.subtotal)+'*',
-    '💚 À vista com 10% desc: *'+avista+'*',
-    '💳 Até 12x sem juros de *'+parc+'*','',
+    '💚 À vista com 10% desc: *'+_avistaVal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'*',
+    (p.avistaparc>0 ? '   ou em '+p.avistaparc+'x sem juros de *'+fmtBRL(Math.ceil((p.total||p.subtotal)/p.avistaparc*100)/100)+'* cada' : ''),
+    '💳 Até '+_parc_n+'x sem juros de *'+parc+'*','',
     '✅ Frete grátis · Somente ao receber','',
     '📞 contato.aconaval@gmail.com','🌐 www.aconaval.com'
   ].filter(l=>l!==undefined&&l!=='').join('\n');
@@ -2707,6 +2751,8 @@ function editarPedido(id) {
     restorePrazoEntrega(p.prazo || '');
     document.getElementById('pd-obs').value    = p.obs    || '';
     document.getElementById('pd-numero').value = p.num    || '';
+    const _parEl = document.getElementById('pd-parcelas'); if(_parEl) _parEl.value = p.parcelas||12;
+    const _apEl = document.getElementById('pd-avista-parc'); if(_apEl) _apEl.value = p.avistaparc||0;
     // Restaura desconto com os valores exatos salvos
     const rpPct = document.getElementById('pd-inp-desc-pct');
     const rpVal = document.getElementById('pd-inp-desc-val');
@@ -2737,6 +2783,19 @@ function gerarPedido() {
   const prazoVal = document.getElementById('pd-prazo').value.trim();
   if (!prazoVal) return alert('Selecione o prazo de entrega (verde ou vermelho).');
 
+  // Bloqueia número duplicado (exceto quando editando o próprio pedido)
+  const numExistente = pedidos.find(p => p.num == numVal && p.id != pedidoEditandoId);
+  if (numExistente) {
+    const nomeExist = numExistente.nome || 'sem nome';
+    const conf = confirm(
+      '⚠️ Número ' + String(numVal).padStart(3,'0') + ' já existe!\n\n' +
+      'Cliente: ' + nomeExist + '\n' +
+      'Data: ' + (numExistente.data ? new Date(numExistente.data).toLocaleDateString('pt-BR') : '—') + '\n\n' +
+      'Deseja usar outro número? (OK = cancelar e corrigir)'
+    );
+    if (conf) return;
+  }
+
   const dadosPedido = {
     num: numVal,
     nome,
@@ -2751,6 +2810,8 @@ function gerarPedido() {
     estado: document.getElementById('pd-estado').value.trim(),
     prazo:  document.getElementById('pd-prazo').value.trim(),
     obs:    document.getElementById('pd-obs').value.trim(),
+    parcelas:    parseInt(document.getElementById('pd-parcelas')?.value)||12,
+    avistaparc:  parseInt(document.getElementById('pd-avista-parc')?.value)||0,
     items:  JSON.parse(JSON.stringify(validItems)),
     subtotal: validItems.reduce((s, i) => s + (parseFloat(i.preco) || 0), 0),
     desconto: calcDesconto(validItems.reduce((s,i)=>s+(parseFloat(i.preco)||0),0),'pd-inp-desc-pct','pd-inp-desc-val'),
@@ -2797,6 +2858,8 @@ async function savePedidos() {
       items: (p.items || []).map(it => { const i = {...it}; delete i.foto; return i; })
     }));
     await db.collection('acn').doc('pedidos').set({lista: pedidosSemFoto});
+    // Backup local sempre que salvar com sucesso
+    try { localStorage.setItem('acn_pedidos_backup', JSON.stringify({ts: Date.now(), lista: pedidosSemFoto})); } catch(e){}
     setPS('✅ Pedido salvo!', 'ok');
   } catch(e) {
     console.error('Erro ao salvar pedido:', e);
@@ -2917,11 +2980,12 @@ function getHTMLPed(p) {
     const nome = `<strong style="text-transform:uppercase">${lines[0]}</strong>`;
     const resto = lines.slice(1).join('<br>');
     const descHtmlB = nome + (resto ? '<br><span style="font-weight:normal">' + resto + '</span>' : '');
+    const prodFotoPd = item.prodId ? (produtos.find(p => p.id == item.prodId)||{}).foto || '' : (item.foto||'');
     return `<tr>
       <td class="idx" style="vertical-align:top;padding-top:10px">${String(idx+1).padStart(2,'0')}</td>
       <td>
         <div style="display:table;width:100%">
-          ${item.foto?`<div style="display:table-cell;width:90px;vertical-align:top;padding-right:12px"><img src="${item.foto}" style="width:80px;height:80px;object-fit:contain;background:#fff"/></div>`:''}
+          ${prodFotoPd?`<div style="display:table-cell;width:90px;vertical-align:top;padding-right:12px"><img src="${prodFotoPd}" style="width:80px;height:80px;object-fit:contain;background:#fff"/></div>`:''}
           <div style="display:table-cell;vertical-align:top">${descHtmlB}</div>
         </div>
       </td>
@@ -3131,8 +3195,8 @@ function getHTMLPed(p) {
       <div class="pay-title" style="text-align:center">Cartão de Crédito</div>
       <div class="pay-info" style="text-align:center">
         <span style="font-size:15pt;font-weight:700;color:#003366">${fmtBRL(p.total||p.subtotal)}</span><br>
-        <span style="font-size:12pt;color:#003366">Em até 12x sem juros de</span><br>
-        <span style="font-size:12pt;font-weight:700;color:#003366">${fmtBRL(Math.ceil((p.total||p.subtotal)/12*100)/100)} cada parcela</span>
+        <span style="font-size:12pt;color:#003366">Em até ${p.parcelas||12}x sem juros de</span><br>
+        <span style="font-size:12pt;font-weight:700;color:#003366">${fmtBRL(Math.ceil((p.total||p.subtotal)/(p.parcelas||12)*100)/100)} cada parcela</span>
       </div>
     </div>
     <div class="pay-cell" style="text-align:center">
@@ -3140,7 +3204,8 @@ function getHTMLPed(p) {
       <div class="pay-title" style="text-align:center">À Vista — Desconto de 10%</div>
       <div class="pay-info" style="text-align:center">
         <span style="font-size:15pt;font-weight:700;color:#1a7a44">${fmtBRL(avista)}</span><br>
-        <span style="color:#1a7a44;font-size:12pt">Chave PIX (e-mail):<br>contato.aconaval@gmail.com</span>
+        ${p.avistaparc>0?`<span style="font-size:11pt;color:#1a7a44;font-weight:600">ou em ${p.avistaparc}x sem juros de<br>${fmtBRL(Math.ceil((p.total||p.subtotal)/(p.avistaparc)*100)/100)} cada</span><br>`:''}
+        <span style="color:#1a7a44;font-size:11pt">Chave PIX (e-mail):<br>contato.aconaval@gmail.com</span>
       </div>
     </div>
   </div>
@@ -3215,11 +3280,12 @@ function getHTMLPed(p) {
       const nome = `<strong style="font-size:15pt;text-transform:uppercase">${lines[0]}</strong>`;
       const resto = lines.slice(1).join('<br>');
       const descHtml = nome + (resto?'<br><span style="font-size:14pt;font-weight:normal">'+resto+'</span>':'');
+      const prodFotoPdBig = item.prodId ? (produtos.find(p => p.id == item.prodId)||{}).foto || '' : (item.foto||'');
       return `<tr>
         <td class="idx" style="vertical-align:top;padding-top:16px;font-size:14pt">${String(idx+1).padStart(2,'0')}</td>
         <td style="padding:14px 10px;vertical-align:top">
           <div style="display:table;width:100%">
-            ${item.foto?`<div style="display:table-cell;width:158px;vertical-align:top;padding-right:16px"><img src="${item.foto}" style="width:144px;height:144px;object-fit:contain;background:#fff"/></div>`:''}
+            ${prodFotoPdBig?`<div style="display:table-cell;width:158px;vertical-align:top;padding-right:16px"><img src="${prodFotoPdBig}" style="width:144px;height:144px;object-fit:contain;background:#fff"/></div>`:''}
             <div style="display:table-cell;vertical-align:middle">${descHtml}</div>
           </div>
         </td>
@@ -3260,6 +3326,47 @@ ${projetoPrintPedHtml}
 </body></html>`;
 }
 
+function verBackupLocal() {
+  let backup = null;
+  try { backup = JSON.parse(localStorage.getItem('acn_pedidos_backup') || 'null'); } catch(e){}
+  const antigo = JSON.parse(localStorage.getItem('acn_pedidos') || 'null');
+
+  if (!backup && !antigo) {
+    alert('Nenhum backup local encontrado.\n\nO backup é gravado automaticamente a cada salvamento bem-sucedido. Como este é o primeiro acesso após a atualização, ainda não há backup salvo.\n\nSe o pedido foi apagado hoje, entre em contato para verificar o histórico do Firestore.');
+    return;
+  }
+
+  const lista = backup ? backup.lista : antigo;
+  const ts    = backup ? new Date(backup.ts).toLocaleString('pt-BR') : 'data desconhecida';
+  const atual = new Set(pedidos.map(p => p.id));
+  const faltando = lista.filter(p => !atual.has(p.id));
+
+  let msg = '🗂️ BACKUP LOCAL — salvo em: ' + ts + '\n';
+  msg += '━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+  msg += 'Total no backup: ' + lista.length + ' pedidos\n';
+  msg += 'Total atual:     ' + pedidos.length + ' pedidos\n';
+
+  if (faltando.length > 0) {
+    msg += '\n⚠️ ' + faltando.length + ' pedido(s) no backup que NÃO estão no sistema atual:\n';
+    faltando.forEach(p => {
+      msg += '  • Pedido #' + String(p.num).padStart(3,'0') + ' — ' + (p.nome||'sem nome') + ' — ' + fmtBRL(p.total||p.subtotal||0) + '\n';
+    });
+    msg += '\nDeseja restaurar os pedidos faltando?';
+    const conf = confirm(msg);
+    if (conf) {
+      faltando.forEach(p => { if (!pedidos.find(x => x.id === p.id)) pedidos.push(p); });
+      pedidos.sort((a,b) => (b.num||0)-(a.num||0));
+      updateBadgePedidos();
+      renderListaPedidos();
+      savePedidos().catch(e => console.warn(e));
+      alert('✅ ' + faltando.length + ' pedido(s) restaurado(s) com sucesso!');
+    }
+  } else {
+    msg += '\n✅ Nenhuma diferença encontrada — o backup está sincronizado com o sistema atual.';
+    alert(msg);
+  }
+}
+
 function printPedido(){
   const p=currentPedido; if(!p) return;
   const w=window.open('','_blank');
@@ -3267,6 +3374,7 @@ function printPedido(){
   w.document.close();
   w.onload=()=>w.print();
 }
+
 
 
 </script>
