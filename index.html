@@ -499,7 +499,10 @@ tbody tr:hover{background:#fafbfc}
     <div class="modal-body" id="modal-solic-body"></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModalSolic()">Cancelar</button>
-      <button class="btn btn-success" onclick="converterEmPedido()">📦 Criar Pedido com estes dados</button>
+      <div id="solic-ja-convertida" style="display:none;background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:6px 12px;font-size:12px;color:#7d5800;align-self:center">
+        ⚠️ Esta solicitação já foi convertida antes
+      </div>
+      <button class="btn btn-success" id="btn-converter-pedido" onclick="converterEmPedido()">📦 Criar Pedido com estes dados</button>
     </div>
   </div>
 </div>
@@ -2212,7 +2215,11 @@ function renderSolicitacoes() {
       </div>
       <span style="font-size:11px;font-weight:700;color:${statusColor};white-space:nowrap">${statusLabel}</span>
       <div style="display:flex;gap:6px;margin-left:12px">
-        ${s.status==='aguardando'?`<button class="btn btn-success btn-sm" onclick="abrirSolic('${s.id}')">📦 Criar Pedido</button>`:''}
+        ${s.status==='aguardando'
+          ? `<button class="btn btn-success btn-sm" onclick="abrirSolic('${s.id}')">📦 Criar Pedido</button>`
+          : s.status==='convertido'
+            ? `<button class="btn btn-ghost btn-sm" onclick="abrirSolic('${s.id}')" style="border-color:#f0ad4e;color:#8a6000">🔄 Converter novamente</button>`
+            : ''}
         <button class="btn btn-danger btn-sm" onclick="deleteSolic('${s.id}')">🗑️</button>
       </div>
     </div>`;
@@ -2241,6 +2248,22 @@ function abrirSolic(id) {
       </div>
     </div>`;
   document.getElementById('modal-solic').style.display = 'flex';
+  // Avisa se já foi convertida antes
+  const jaConv = document.getElementById('solic-ja-convertida');
+  const btnConv = document.getElementById('btn-converter-pedido');
+  if (jaConv && btnConv) {
+    if (s.status === 'convertido') {
+      jaConv.style.display = 'flex';
+      btnConv.textContent = '🔄 Converter novamente';
+      btnConv.style.background = '#e67e22';
+      btnConv.style.borderColor = '#e67e22';
+    } else {
+      jaConv.style.display = 'none';
+      btnConv.textContent = '📦 Criar Pedido com estes dados';
+      btnConv.style.background = '';
+      btnConv.style.borderColor = '';
+    }
+  }
 }
 
 function closeModalSolic() {
@@ -2615,7 +2638,7 @@ function buildMsgPed(p) {
     '📋 *Itens:*',itens,'',
     '💰 *Total: '+fmtBRL(p.total||p.subtotal)+'*',
     '💚 À vista com 10% desc: *'+_avistaVal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'*',
-    (p.avistaparc>0 ? '   ou em '+p.avistaparc+'x sem juros de *'+fmtBRL(Math.ceil((p.total||p.subtotal)/p.avistaparc*100)/100)+'* cada' : ''),
+    (p.avistaparc>0 ? '   ou em '+p.avistaparc+'x sem juros de *'+fmtBRL(Math.ceil(_avistaVal/p.avistaparc*100)/100)+'* cada' : ''),
     '💳 Até '+_parc_n+'x sem juros de *'+parc+'*','',
     '✅ Frete grátis · Somente ao receber','',
     '📞 contato.aconaval@gmail.com','🌐 www.aconaval.com'
@@ -3204,7 +3227,7 @@ function getHTMLPed(p) {
       <div class="pay-title" style="text-align:center">À Vista — Desconto de 10%</div>
       <div class="pay-info" style="text-align:center">
         <span style="font-size:15pt;font-weight:700;color:#1a7a44">${fmtBRL(avista)}</span><br>
-        ${p.avistaparc>0?`<span style="font-size:11pt;color:#1a7a44;font-weight:600">ou em ${p.avistaparc}x sem juros de<br>${fmtBRL(Math.ceil((p.total||p.subtotal)/(p.avistaparc)*100)/100)} cada</span><br>`:''}
+        ${p.avistaparc>0?`<span style="font-size:11pt;color:#1a7a44;font-weight:600">ou em ${p.avistaparc}x sem juros de<br>${fmtBRL(Math.ceil(avista/(p.avistaparc)*100)/100)} cada</span><br>`:''}
         <span style="color:#1a7a44;font-size:11pt">Chave PIX (e-mail):<br>contato.aconaval@gmail.com</span>
       </div>
     </div>

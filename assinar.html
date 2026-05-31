@@ -432,7 +432,7 @@ function renderPedido(p) {
   const parc     = Math.ceil(total / nParc * 100) / 100;
   const avistaParc = p.avistaparc || 0;
   const avistaExtra = avistaParc > 0
-    ? Math.ceil(total / avistaParc * 100) / 100
+    ? Math.ceil(avista / avistaParc * 100) / 100
     : 0;
   document.getElementById('p-subtotal').textContent = fmtBRL(sub);
   document.getElementById('p-total').textContent    = fmtBRL(total);
