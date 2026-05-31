@@ -427,14 +427,26 @@ function renderPedido(p) {
   const sub   = p.subtotal || 0;
   const total = p.total || sub;
   const desc  = p.desconto || 0;
-  const avista = total * 0.90;
-  const parc   = Math.ceil(total / 12 * 100) / 100;
+  const avista   = total * 0.90;
+  const nParc    = p.parcelas || 12;
+  const parc     = Math.ceil(total / nParc * 100) / 100;
+  const avistaParc = p.avistaparc || 0;
+  const avistaExtra = avistaParc > 0
+    ? Math.ceil(total / avistaParc * 100) / 100
+    : 0;
   document.getElementById('p-subtotal').textContent = fmtBRL(sub);
   document.getElementById('p-total').textContent    = fmtBRL(total);
   document.getElementById('p-avista').textContent   = `À vista com 10% desc: ${fmtBRL(avista)}`;
   document.getElementById('p-cartao').textContent   = fmtBRL(total);
-  document.getElementById('p-parcela').textContent  = `Até 12x de ${fmtBRL(parc)}`;
+  document.getElementById('p-parcela').textContent  = `Até ${nParc}x de ${fmtBRL(parc)}`;
   document.getElementById('p-pix').textContent      = fmtBRL(avista);
+  // Opção parcelada adicional no bloco à vista
+  const pixSubEl = document.querySelector('#p-pix + .pay-sub') || document.querySelector('.pay-cell:last-child .pay-sub');
+  if (pixSubEl) {
+    pixSubEl.innerHTML = avistaParc > 0
+      ? `ou em ${avistaParc}x sem juros de ${fmtBRL(avistaExtra)} cada<br>contato.aconaval@gmail.com`
+      : 'contato.aconaval@gmail.com';
+  }
   // Mostra linha de desconto se houver
   const discRow = document.getElementById('p-desc-row');
   if (discRow) discRow.style.display = desc > 0 ? 'flex' : 'none';
@@ -590,17 +602,7 @@ async function confirmarPedido() {
   btn.disabled=true; btn.innerHTML='⏳ Salvando...'; statusEl.textContent='';
 
   try {
-    // Comprime a assinatura: converte para JPEG na resolução de exibição real
-    // (evita PNG gigante em telas Retina/3x que estoura o limite de 1MB do Firestore)
-    const dpr = window.devicePixelRatio || 1;
-    const tmpCanvas = document.createElement('canvas');
-    tmpCanvas.width  = Math.round(canvas.width  / dpr);
-    tmpCanvas.height = Math.round(canvas.height / dpr);
-    const tmpCtx = tmpCanvas.getContext('2d');
-    tmpCtx.fillStyle = '#ffffff';
-    tmpCtx.fillRect(0, 0, tmpCanvas.width, tmpCanvas.height);
-    tmpCtx.drawImage(canvas, 0, 0, tmpCanvas.width, tmpCanvas.height);
-    const signImg = tmpCanvas.toDataURL('image/jpeg', 0.65);
+    const signImg = canvas.toDataURL('image/png');
     const snap = await db.collection('acn').doc('pedidos').get();
     if (!snap.exists) throw new Error('Pedido não encontrado');
 
