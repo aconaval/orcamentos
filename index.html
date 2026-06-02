@@ -341,7 +341,7 @@ tbody tr:hover{background:#fafbfc}
       </div>
       <div class="form-group"><label class="form-label">Observação (opcional)</label><input class="form-input" id="inp-obs" placeholder="Detalhes adicionais exibidos no orçamento"/></div>
       <div id="filtros-extras-form"></div>
-      <div class="card" style="background:#f8fbff;border:1px solid #B5D4F4;margin-bottom:12px">
+      <div class="card" id="mod-croqui-card" style="background:#f8fbff;border:1px solid #B5D4F4;margin-bottom:12px">
         <div style="font-size:13px;font-weight:700;color:#185FA5;margin-bottom:4px">📐 Módulo no Croqui</div>
         <div style="font-size:11px;color:#888;margin-bottom:10px">Define como este produto aparece no desenho do projeto. A medida é lida do campo "Dimensões" acima (ex: 250x60).</div>
         <div class="grid2">
@@ -353,6 +353,7 @@ tbody tr:hover{background:#fafbfc}
               <option value="grelha">Churrasqueira (grelha)</option>
               <option value="forno">Forno (porta)</option>
               <option value="coifa">Coifa</option>
+              <option value="semcroqui">— Sem croqui (não exibir no Projetos)</option>
             </select>
           </div>
           <div class="form-group" style="margin-bottom:8px">
@@ -865,6 +866,7 @@ function editarCroquiProduto(codigo){
   window.open(PROJETOS_URL+sep+'produto='+encodeURIComponent(codigo),'_blank');
 }
 let filtrosDef = {};      // ex: { "Fogão": ["Largura","Material"], "Chaminé": ["Diâmetro"] }
+let catsSemCroqui = new Set(); // categorias sem croqui no sistema de Projetos
 let filtrosAtivos = {};   // ex: {"Largura":"70cm"}
 let categorias = [];      // ex: ["Fogão", "Chaminé", "Churrasqueira"]
 
@@ -988,7 +990,7 @@ async function save() {
     await Promise.all([
       colOrc.doc('orcamentos').set({ lista: orcSemFoto }),
       colOrc.doc('produtos_index').set({ ids: produtos.map(p => p.id) }),
-      colOrc.doc('config').set({ filtrosDef, categorias })
+      colOrc.doc('config').set({ filtrosDef, categorias, catsSemCroqui:[...catsSemCroqui] })
     ]);
 
     // Cada produto em seu próprio documento
@@ -1033,6 +1035,7 @@ async function loadFromFirebase() {
       filtrosDef = cfgSnap.data().filtrosDef || {};
       if (Array.isArray(filtrosDef)) filtrosDef = {}; // migração do formato antigo
       categorias = cfgSnap.data().categorias || [];
+      catsSemCroqui = new Set(cfgSnap.data().catsSemCroqui || []);
     }
     // Migração: se não há categorias salvas, extrai dos produtos existentes
     if (!categorias.length && produtos.length) {
@@ -1055,6 +1058,7 @@ async function loadFromFirebase() {
     filtrosDef = JSON.parse(localStorage.getItem('acn_filtros_def') || '{}');
     if (Array.isArray(filtrosDef)) filtrosDef = {};
     categorias = JSON.parse(localStorage.getItem('acn_categorias') || '[]');
+    catsSemCroqui = new Set(JSON.parse(localStorage.getItem('acn_cats_sem_croqui') || '[]'));
     if (!categorias.length && produtos.length) {
       categorias = [...new Set(produtos.map(p=>p.cat).filter(Boolean))];
     }
@@ -1091,6 +1095,7 @@ function clearProdForm() {
   const mc=document.getElementById('inp-mod-cor'); if(mc) mc.value='#26292b|true';
   const mb=document.getElementById('inp-mod-bocas'); if(mb) mb.value='4';
   updateModBocasVisibility();
+  renderFiltrosExtrasForm();
   currentFotoBase64 = null;
   resetFotoUI();
   currentFotosProjetoBase64 = [];
@@ -1263,10 +1268,17 @@ function renderFiltrosDefPanel(){
   } else {
     wrap.innerHTML = categorias.map(cat=>{
       const fs = filtrosDef[cat] || [];
+      const semCroqui=catsSemCroqui.has(cat);
       return `<div class="cat-card">
         <div class="cat-card-header">
           <span class="cat-card-name">📂 ${cat}</span>
-          <button class="btn btn-danger btn-sm" style="padding:2px 8px;font-size:11px" onclick="removeCategoria('${cat.replace(/'/g,"\\'")}')">✕ Remover categoria</button>
+          <div style="display:flex;align-items:center;gap:8px">
+            <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:#666;cursor:pointer;user-select:none" title="Quando ativo, produtos dessa categoria não aparecem no sistema de Projetos">
+              <input type="checkbox" ${semCroqui?'checked':''} onchange="toggleCatSemCroqui('${cat.replace(/'/g,"\\'")}',this.checked)" style="cursor:pointer">
+              Sem croqui
+            </label>
+            <button class="btn btn-danger btn-sm" style="padding:2px 8px;font-size:11px" onclick="removeCategoria('${cat.replace(/'/g,"\\'")}')">✕ Remover</button>
+          </div>
         </div>
         <div class="cat-filtros-row" id="filtros-row-${slugify(cat)}">
           ${fs.length
@@ -1343,16 +1355,26 @@ function removeFiltroDef(cat, idx){
     renderProdutos();
   });
 }
+async function toggleCatSemCroqui(cat, semCroqui){
+  if(semCroqui) catsSemCroqui.add(cat);
+  else catsSemCroqui.delete(cat);
+  saveConfig();
+}
+
 async function saveConfig(){
   try {
-    await db.collection('acn').doc('config').set({ filtrosDef, categorias });
+    if(db) await db.collection('acn').doc('config').set({ filtrosDef, categorias, catsSemCroqui:[...catsSemCroqui] });
     localStorage.setItem('acn_filtros_def', JSON.stringify(filtrosDef));
     localStorage.setItem('acn_categorias', JSON.stringify(categorias));
+    localStorage.setItem('acn_cats_sem_croqui', JSON.stringify([...catsSemCroqui]));
   } catch(e){ console.error('saveConfig error',e); }
 }
 
 // ── Campos dinâmicos no formulário de produto ────────────────
 function renderFiltrosExtrasForm(){
+  const catSel=(document.getElementById('inp-cat')?.value||'').trim();
+  const modCard=document.getElementById('mod-croqui-card');
+  if(modCard) modCard.style.display=catsSemCroqui.has(catSel)?'none':'block';
   const wrap=document.getElementById('filtros-extras-form');
   if(!wrap) return;
   const sel=document.getElementById('inp-cat');
@@ -1459,7 +1481,7 @@ function renderProdutos() {
         <td style="text-align:right"><span class="price-tag">${fmtBRL(p.preco)}</span></td>
         <td><div class="td-actions">
           <button class="btn btn-ghost btn-sm" onclick="editProduto(${p.id})">✏️ Editar</button>
-          <button class="btn btn-ghost btn-sm" onclick="editarCroquiProduto(${p.codigo})" title="Abrir editor de croqui">📐 Croqui</button>
+          ${!catsSemCroqui.has(p.cat)?`<button class="btn btn-ghost btn-sm" onclick="editarCroquiProduto(${p.codigo})" title="Abrir editor de croqui">📐 Croqui</button>`:''}
           <button class="btn btn-danger btn-sm" onclick="deleteProduto(${p.id})">🗑️</button>
         </div></td>
       </tr>`;}).join('');
